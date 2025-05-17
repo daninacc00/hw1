@@ -9,7 +9,7 @@
  * @return bool True se l'utente è loggato, false altrimenti
  */
 function isLoggedIn() {
-    return isset($_SESSION['user_id']);
+    return isset($_SESSION['utente_id']);
 }
 
 /**
@@ -22,17 +22,17 @@ function getCurrentUser() {
         return null;
     }
     
-    $userId = $_SESSION['user_id'];
+    $userId = $_SESSION['utente_id'];
     
     // In un'implementazione reale questo recupererebbe l'utente dal database
-    foreach ($_SESSION['users'] as $user) {
-        if ($user['id'] === $userId) {
-            // Non restituire la password
-            $userCopy = $user;
-            unset($userCopy['password']);
-            return $userCopy;
-        }
-    }
+    // foreach ($_SESSION['users'] as $user) {
+    //     if ($user['id'] === $userId) {
+    //         // Non restituire la password
+    //         $userCopy = $user;
+    //         unset($userCopy['password']);
+    //         return $userCopy;
+    //     }
+    // }
     
     return null;
 }
@@ -45,11 +45,11 @@ function getCurrentUser() {
  */
 function usernameExists($username) {
     // In un'implementazione reale questo verificherebbe nel database
-    foreach ($_SESSION['users'] as $user) {
-        if (strtolower($user['username']) === strtolower($username)) {
-            return true;
-        }
-    }
+    // foreach ($_SESSION['users'] as $user) {
+    //     if (strtolower($user['username']) === strtolower($username)) {
+    //         return true;
+    //     }
+    // }
     
     return false;
 }
@@ -100,7 +100,7 @@ function registerUser($username, $email, $password) {
     ];
     
     // Salva l'utente (in un'implementazione reale questo salverebbe nel database)
-    $_SESSION['users'][] = $user;
+    // $_SESSION['users'][] = $user;
     
     return true;
 }
@@ -117,13 +117,13 @@ function authenticateUser($username, $password) {
     $hashedPassword = md5($password); // Nota: md5 non è sicuro! Usalo solo per demo
     
     // Cerca l'utente (in un'implementazione reale questo cercherebbe nel database)
-    foreach ($_SESSION['users'] as $user) {
-        if (strtolower($user['username']) === strtolower($username) && $user['password'] === $hashedPassword) {
-            // Utente trovato, imposta la sessione
-            $_SESSION['user_id'] = $user['id'];
-            return true;
-        }
-    }
+    // foreach ($_SESSION['users'] as $user) {
+    //     if (strtolower($user['username']) === strtolower($username) && $user['password'] === $hashedPassword) {
+    //         // Utente trovato, imposta la sessione
+    //         $_SESSION['utente_id'] = $user['id'];
+    //         return true;
+    //     }
+    // }
     
     return false;
 }
@@ -132,8 +132,8 @@ function authenticateUser($username, $password) {
  * Effettua il logout dell'utente
  */
 function logoutUser() {
-    // Elimina la variabile di sessione user_id
-    unset($_SESSION['user_id']);
+    // Elimina la variabile di sessione utente_id
+    unset($_SESSION['utente_id']);
     
     // Opzionale: distruggi completamente la sessione
     // session_destroy();

@@ -1,6 +1,6 @@
 <?php
-session_start();
-require_once '../classes/User.php';
+require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../assets/classes/User.php';
 
 header('Content-Type: application/json');
 
@@ -10,14 +10,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Validazione input
-if (empty($_POST['login']) || empty($_POST['password'])) {
+if (empty($_POST['username']) || empty($_POST['password'])) {
     echo json_encode(['success' => false, 'message' => 'Username/Email e password sono obbligatori']);
     exit;
 }
 
 // Login utente
 $user = new User();
-$result = $user->loginUtente(trim($_POST['login']), $_POST['password']);
+$result = $user->loginUtente(trim($_POST['username']), $_POST['password']);
 
 if ($result['success']) {
     // Salva dati utente in sessione

@@ -8,6 +8,8 @@ function onResponse(data) {
 }
 
 function onError(message) {
+    console.error('Errore:', error);
+    
     const errorMessage = document.querySelector(".error-message");
     if (errorMessage) {
         errorMessage.innerHTML = "";
