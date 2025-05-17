@@ -1,6 +1,8 @@
 <?php
 // Configurazione di base
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Impostazioni di errore (Da disabilitare in produzione)
 error_reporting(E_ALL);

@@ -45,6 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - <?php echo SITE_NAME; ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/validation.js" defer></script>
+    <script src="assets/js/login.js" defer></script>
 </head>
 <body>
     <div class="container">
@@ -98,6 +100,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     
-    <script src="assets/js/validation.js"></script>
 </body>
 </html>
