@@ -1,82 +1,9 @@
 <?php
-// Includi la classe User invece delle funzioni originali
-require_once 'assets/classes/User.php';
 require_once 'includes/config.php';
 
-// Se l'utente è già loggato, reindirizza alla dashboard
 if (isset($_SESSION['utente_id'])) {
     header('Location: index.php');
     exit;
-}
-
-$errors = [];
-$username = '';
-$email = '';
-$nome = '';
-$cognome = '';
-
-// Processa il form di registrazione
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $nome = trim($_POST['nome'] ?? '');
-    $cognome = trim($_POST['cognome'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $password_confirm = $_POST['password_confirm'] ?? '';
-
-    // Validazione lato server
-    if (empty($username)) {
-        $errors['username'] = 'Username è obbligatorio';
-    } elseif (strlen($username) < 3) {
-        $errors['username'] = 'Username deve contenere almeno 3 caratteri';
-    }
-
-    if (empty($email)) {
-        $errors['email'] = 'Email è obbligatoria';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = 'Email non valida';
-    }
-
-    if (empty($nome)) {
-        $errors['nome'] = 'Nome è obbligatorio';
-    }
-
-    if (empty($cognome)) {
-        $errors['cognome'] = 'Cognome è obbligatorio';
-    }
-
-    if (empty($password)) {
-        $errors['password'] = 'Password è obbligatoria';
-    } elseif (strlen($password) < 8) {
-        $errors['password'] = 'Password deve contenere almeno 8 caratteri';
-    }
-
-    if ($password !== $password_confirm) {
-        $errors['password_confirm'] = 'Le password non corrispondono';
-    }
-
-    // Se non ci sono errori, registra l'utente
-    if (empty($errors)) {
-        $user = new User();
-        $result = $user->registraUtente($username, $email, $password, $nome, $cognome);
-
-        if ($result['success']) {
-            // Registrazione riuscita, effettua il login automatico
-            $loginResult = $user->loginUtente($username, $password);
-            if ($loginResult['success']) {
-                $_SESSION['utente_id'] = $loginResult['utente']['id_utente'];
-                $_SESSION['username'] = $loginResult['utente']['username'];
-                $_SESSION['nome_completo'] = $loginResult['utente']['nome'] . ' ' . $loginResult['utente']['cognome'];
-                header('Location: index.php');
-                exit;
-            } else {
-                header('Location: login.php');
-                exit;
-            }
-        } else {
-            $errors['registration'] = $result['message'];
-        }
-    }
 }
 ?>
 
@@ -103,9 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <h1>DIVENTA UN MEMBRO</h1>
 
-            <?php if (!empty($errors['registration'])): ?>
-                <div class="error-message"><?php echo htmlspecialchars($errors['registration']); ?></div>
-            <?php endif; ?>
+            <div class="error-message hidden"></div>
 
             <form id="registerForm" method="POST" action="register.php" novalidate>
                 <div class="form-group">
@@ -114,12 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="text"
                         id="username"
                         name="username"
-                        value="<?php echo htmlspecialchars($username); ?>"
-                        class="<?php echo !empty($errors['username']) ? 'error' : ''; ?>"
                         required>
-                    <?php if (!empty($errors['username'])): ?>
-                        <span class="error-text"><?php echo htmlspecialchars($errors['username']); ?></span>
-                    <?php endif; ?>
                 </div>
 
                 <div class="form-group">
@@ -128,27 +48,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="email"
                         id="email"
                         name="email"
-                        value="<?php echo htmlspecialchars($email); ?>"
-                        class="<?php echo !empty($errors['email']) ? 'error' : ''; ?>"
                         required>
-                    <?php if (!empty($errors['email'])): ?>
-                        <span class="error-text"><?php echo htmlspecialchars($errors['email']); ?></span>
-                    <?php endif; ?>
                 </div>
 
-                <!-- Nuovi campi Nome e Cognome -->
                 <div class="form-group">
                     <label for="nome">Nome</label>
                     <input
                         type="text"
                         id="nome"
                         name="nome"
-                        value="<?php echo htmlspecialchars($nome); ?>"
-                        class="<?php echo !empty($errors['nome']) ? 'error' : ''; ?>"
                         required>
-                    <?php if (!empty($errors['nome'])): ?>
-                        <span class="error-text"><?php echo htmlspecialchars($errors['nome']); ?></span>
-                    <?php endif; ?>
                 </div>
 
                 <div class="form-group">
@@ -157,12 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="text"
                         id="cognome"
                         name="cognome"
-                        value="<?php echo htmlspecialchars($cognome); ?>"
-                        class="<?php echo !empty($errors['cognome']) ? 'error' : ''; ?>"
                         required>
-                    <?php if (!empty($errors['cognome'])): ?>
-                        <span class="error-text"><?php echo htmlspecialchars($errors['cognome']); ?></span>
-                    <?php endif; ?>
                 </div>
 
                 <div class="form-group">
@@ -171,11 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="password"
                         id="password"
                         name="password"
-                        class="<?php echo !empty($errors['password']) ? 'error' : ''; ?>"
                         required>
-                    <?php if (!empty($errors['password'])): ?>
-                        <span class="error-text"><?php echo htmlspecialchars($errors['password']); ?></span>
-                    <?php endif; ?>
                     <div class="password-requirements">
                         <p>La password deve contenere:</p>
                         <ul>
@@ -194,11 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         type="password"
                         id="password_confirm"
                         name="password_confirm"
-                        class="<?php echo !empty($errors['password_confirm']) ? 'error' : ''; ?>"
                         required>
-                    <?php if (!empty($errors['password_confirm'])): ?>
-                        <span class="error-text"><?php echo htmlspecialchars($errors['password_confirm']); ?></span>
-                    <?php endif; ?>
+
                 </div>
 
                 <button type="submit" class="btn btn-primary">REGISTRATI</button>

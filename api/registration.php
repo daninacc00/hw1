@@ -1,6 +1,5 @@
 <?php
-session_start();
-require_once '../classes/User.php';
+require_once __DIR__ . '/../assets/classes/User.php';
 
 header('Content-Type: application/json');
 
@@ -39,6 +38,7 @@ if (!empty($errors)) {
 
 // Registrazione utente
 $user = new User();
+
 $result = $user->registraUtente(
     trim($_POST['username']),
     trim($_POST['email']),
@@ -48,4 +48,6 @@ $result = $user->registraUtente(
 );
 
 echo json_encode($result);
+exit;
+
 ?>

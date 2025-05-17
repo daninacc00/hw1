@@ -1,7 +1,7 @@
 <?php
 // Configurazione database
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'sistema_login');
+define('DB_NAME', 'hw1');
 define('DB_USER', 'root');
 define('DB_PASS', ''); // Di default XAMPP non ha password per root
 
