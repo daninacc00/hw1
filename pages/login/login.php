@@ -1,39 +1,11 @@
 <?php
-require_once 'includes/config.php';
-require_once 'includes/functions.php';
-require_once 'includes/auth.php';
+require_once __DIR__ . '/../../includes/config.php';
+require_once __DIR__ . '/../../includes/functions.php';
+require_once __DIR__ . '/../../includes/auth.php';
 
 if (isLoggedIn()) {
-    redirect('index.php');
+    redirect('/index.php');
 }
-
-// $errors = [];
-// $username = '';
-
-// // Processa il form di login
-// if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-//     $username = trim($_POST['username'] ?? '');
-//     $password = $_POST['password'] ?? '';
-
-//     // Validazione lato server
-//     if (empty($username)) {
-//         $errors['username'] = 'Username è obbligatorio';
-//     }
-
-//     if (empty($password)) {
-//         $errors['password'] = 'Password è obbligatoria';
-//     }
-
-//     // Se non ci sono errori, prova ad autenticare l'utente
-//     if (empty($errors)) {
-//         if (authenticateUser($username, $password)) {
-//             // Login riuscito, reindirizza alla dashboard
-//             redirect('index.php');
-//         } else {
-//             $errors['login'] = 'Username o password non validi';
-//         }
-//     }
-// }
 ?>
 
 <!DOCTYPE html>
@@ -43,9 +15,10 @@ if (isLoggedIn()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - <?php echo SITE_NAME; ?></title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="assets/js/validation.js" defer></script>
-    <script src="assets/js/login.js" defer></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="login.css">
+    <script src="/utils/validation.js" defer></script>
+    <script src="login.js" defer></script>
 </head>
 
 <body>
@@ -61,7 +34,7 @@ if (isLoggedIn()) {
 
             <div class="error-message hidden"></div>
 
-            <form id="loginForm" method="POST" action="login.php" novalidate>
+            <form id="loginForm" method="POST">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input
@@ -82,7 +55,7 @@ if (isLoggedIn()) {
             </form>
 
             <div class="auth-links">
-                <p>Non hai un account? <a href="register.php">Registrati ora</a></p>
+                <p>Non hai un account? <a href="/pages/registration/registration.php">Registrati ora</a></p>
             </div>
         </div>
     </div>

@@ -6,7 +6,7 @@ require_once 'includes/auth.php';
 
 // Reindirizza l'utente alla pagina di login se non è loggato
 if (!isLoggedIn()) {
-    redirect('login.php');
+    redirect('pages/login/login.php');
 }
 
 // Ottieni le informazioni dell'utente
@@ -19,7 +19,7 @@ $user = getCurrentUser();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - <?php echo SITE_NAME; ?></title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
@@ -32,7 +32,7 @@ $user = getCurrentUser();
             <nav>
                 <ul>
                     <li><a href="index.php">Home</a></li>
-                    <li><a href="logout.php">Logout</a></li>
+                    <li><a href="pages/logout.php">Logout</a></li>
                 </ul>
             </nav>
         </header>

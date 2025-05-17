@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
-require_once __DIR__ . '/../assets/classes/User.php';
+require_once __DIR__ . '/../classes/User.php';
 
 header('Content-Type: application/json');
 

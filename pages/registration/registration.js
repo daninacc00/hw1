@@ -1,0 +1,121 @@
+const passwordField = document.getElementById('password');
+const confirmField = document.getElementById('password_confirm');
+
+if (passwordField) {
+    passwordField.addEventListener('input', function () {
+        validatePasswordStrength(this.value);
+    });
+}
+
+if (confirmField && passwordField) {
+    confirmField.addEventListener('input', function () {
+        if (this.value !== passwordField.value) {
+            showError(this, 'Le password non corrispondono');
+        } else {
+            removeError(this);
+        }
+    });
+}
+
+function validate() {
+    let isValid = true;
+
+    // Validazione username
+    const username = document.getElementById('username');
+    if (username.value.trim() === '') {
+        showError(username, 'Username è obbligatorio');
+        isValid = false;
+    } else if (username.value.trim().length < 3) {
+        showError(username, 'Username deve contenere almeno 3 caratteri');
+        isValid = false;
+    } else {
+        removeError(username);
+
+        //TODO: Verificare se l'username è già in uso (simulazione)
+    }
+
+    // Validazione email
+    const email = document.getElementById('email');
+    if (email.value.trim() === '') {
+        showError(email, 'Email è obbligatoria');
+        isValid = false;
+    } else if (!isValidEmail(email.value.trim())) {
+        showError(email, 'Email non valida');
+        isValid = false;
+    } else {
+        removeError(email);
+    }
+
+    // Validazione password
+    if (passwordField.value === '') {
+        showError(passwordField, 'Password è obbligatoria');
+        isValid = false;
+    } else if (!isValidPassword(passwordField.value)) {
+        showError(passwordField, 'Password non valida. Verifica i requisiti.');
+        isValid = false;
+    } else {
+        removeError(passwordField);
+    }
+
+    // Validazione conferma password
+    if (confirmField.value === '') {
+        showError(confirmField, 'Conferma password è obbligatoria');
+        isValid = false;
+    } else if (confirmField.value !== passwordField.value) {
+        showError(confirmField, 'Le password non corrispondono');
+        isValid = false;
+    } else {
+        removeError(confirmField);
+    }
+
+    return isValid;
+}
+
+function onResponse(data) {
+    console.log(data);
+    if (data.success) {
+        window.location.href = '/pages/login/login.php';
+    } else {
+        onError(data.message);
+    }
+}
+
+function onError(message) {
+    console.error('Errore:', message);
+
+    const errorMessage = document.querySelector(".error-message");
+    if (errorMessage) {
+        errorMessage.innerHTML = "";
+
+        errorMessage.classList.remove("hidden");
+
+        const messageText = document.createElement("span");
+        messageText.textContent = message;
+
+        errorMessage.appendChild(messageText);
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+function handleRegister(e) {
+    e.preventDefault();
+    
+    if(!validate()){
+        return;
+    }
+
+    const formData = new FormData(this);
+
+    fetch('/api/registration.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(onResponse)
+        .catch(onError);
+}
+
+const registerForm = document.getElementById('registerForm');
+registerForm.addEventListener('submit', handleRegister);

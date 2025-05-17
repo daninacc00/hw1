@@ -1,7 +1,32 @@
+function validate() {
+    let isValid = true;
+
+    // Validazione username
+    const username = document.getElementById('username');
+    if (username.value.trim() === '') {
+        showError(username, 'Username è obbligatorio');
+        isValid = false;
+    } else {
+        removeError(username);
+    }
+
+    // Validazione password
+    const password = document.getElementById('password');
+    if (password.value === '') {
+        showError(password, 'Password è obbligatoria');
+        isValid = false;
+    } else {
+        removeError(password);
+    }
+
+    return isValid;
+}
+
+
 function onResponse(data) {
     console.log(data);
     if (data.success) {
-        window.location.href = 'index.php';
+        window.location.href = '/index.php';
     } else {
         onError(data.message);
     }
@@ -28,9 +53,13 @@ function onError(message) {
 function handleLogin(e) {
     e.preventDefault();
 
+    if (!validate()) {
+        return;
+    }
+
     const formData = new FormData(this);
 
-    fetch('api/login.php', {
+    fetch('/api/login.php', {
         method: 'POST',
         body: formData
     })
@@ -39,4 +68,5 @@ function handleLogin(e) {
         .catch(onError);
 }
 
-document.getElementById('loginForm').addEventListener('submit', handleLogin);
+const loginForm = document.getElementById('loginForm');
+loginForm.addEventListener('submit', handleLogin);
