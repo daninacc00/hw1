@@ -17,7 +17,7 @@ if (empty($_POST['username']) || empty($_POST['password'])) {
 
 // Login utente
 $user = new User();
-$result = $user->loginUtente(trim($_POST['username']), $_POST['password']);
+$result = $user->login(trim($_POST['username']), $_POST['password']);
 
 if ($result['success']) {
     // Salva dati utente in sessione

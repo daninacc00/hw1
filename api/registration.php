@@ -40,7 +40,7 @@ if (!empty($errors)) {
 // Registrazione utente
 $user = new User();
 
-$result = $user->registraUtente(
+$result = $user->register(
     trim($_POST['username']),
     trim($_POST['email']),
     $_POST['password'],
