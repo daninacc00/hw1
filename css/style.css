@@ -16,35 +16,3 @@ body {
     color: var(--text-color);
     line-height: 1.6;
 }
-
-/* Dashboard */
-.dashboard {
-    padding: 50px 0;
-}
-
-.dashboard h1 {
-    font-size: 28px;
-    margin-bottom: 20px;
-}
-
-.card {
-    background-color: var(--secondary-color);
-    padding: 30px;
-    border-radius: 8px;
-    margin-top: 30px;
-}
-
-.card h2 {
-    font-size: 24px;
-    margin-bottom: 15px;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 30px 0;
-    color: #666;
-    font-size: 14px;
-    border-top: 1px solid #e5e5e5;
-    margin-top: 50px;
-}
