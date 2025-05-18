@@ -1,0 +1,34 @@
+.password-requirements {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.password-requirements p {
+    margin-bottom: 5px;
+}
+
+.password-requirements ul {
+    list-style: none;
+    margin-left: 15px;
+}
+
+.password-requirements ul li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 5px;
+}
+
+.password-requirements ul li::before {
+    content: "×";
+    color: #ccc;
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: bold;
+}
+
+.password-requirements ul li.valid::before {
+    content: "✓";
+    color: var(--success-color);
+}
