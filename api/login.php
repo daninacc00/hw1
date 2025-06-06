@@ -21,7 +21,7 @@ $result = $user->login(trim($_POST['username']), $_POST['password']);
 
 if ($result['success']) {
     // Salva dati utente in sessione
-    $_SESSION['utente_id'] = $result['utente']['id_utente'];
+    $_SESSION['user_id'] = $result['utente']['id_utente'];
     $_SESSION['username'] = $result['utente']['username'];
     $_SESSION['nome_completo'] = $result['utente']['nome'] . ' ' . $result['utente']['cognome'];
 }

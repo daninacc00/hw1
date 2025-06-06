@@ -16,3 +16,119 @@ body {
     color: var(--text-color);
     line-height: 1.6;
 }
+
+div {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+}
+
+nav,
+header {
+    display: block;
+}
+
+fieldset,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+legend,
+li,
+p,
+span,
+strong,
+ul {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font-family: "Roboto", sans-serif;
+    list-style: none;
+    list-style-type: none;
+}
+
+a {
+    color: #111111;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+button {
+    box-sizing: border-box;
+    font-size: inherit;
+    border: none;
+    cursor: pointer;
+    line-height: inherit;
+    overflow: visible;
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+    text-transform: none;
+}
+
+.link-item {
+    cursor: pointer;
+}
+
+.icon-button {
+    position: relative;
+    cursor: pointer;
+    padding: 8px;
+    border: none;
+    outline: none;
+    background-color: inherit;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+}
+
+.icon-button:hover {
+    background-color: #E5E5E5;
+}
+
+.icon-button img {
+    margin-top: 4px;
+    width: 20px;
+    height: 20px;
+}
+
+.button,
+.chip {
+    vertical-align: top;
+    margin-left: 0;
+    margin-right: 6px;
+    margin-top: 12px;
+    max-width: 100%;
+    font: 500 1rem/1.5 'Roboto', sans-serif;
+    text-align: center;
+    text-decoration: none;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    padding: 6px 16px 6px;
+    min-height: 34px;
+    overflow: hidden;
+    background: #ffffff;
+    color: #111111;
+    border: none;
+    border-radius: 30px;
+    outline: none;
+}
+
+.button:hover,
+.chip:hover {
+    background-color: #CACACB;
+}
+

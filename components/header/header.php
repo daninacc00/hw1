@@ -1,9 +1,36 @@
+<?php
+require_once __DIR__ . '/../../includes/config.php';
+require_once __DIR__ . '/../../includes/functions.php';
+require_once __DIR__ . '/../../includes/auth.php';
+require_once __DIR__ . '/../../classes/User.php';
+require_once __DIR__ . '/../../classes/Favorites.php';
+require_once __DIR__ . '/../../classes/Cart.php';
+
+$userManager = new User();
+$favorites = new Favorites();
+$cart = new Cart();
+
+$user_id = $_SESSION['user_id'] ?? 1;
+
+$num_favorites = null;
+$num_product_in_cart = null;
+$user = null;
+if (isLoggedIn()) {
+    $user = $userManager->getUtenteById($user_id);
+    $num_favorites = $favorites->getNumOfFavorites($user_id);
+    $num_product_in_cart = $cart->getNumOfProductInCart($user_id);
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="it">
 
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/components/header/header.css" />
+    <script src="/components/header/header.js" defer></script>
 </head>
 
 <body>
@@ -46,9 +73,43 @@
                         <div class="vertical-line"></div>
                     </li>
                     <li class="list-item">
-                        <a class="link-item">
-                            <p class="link-text">Accedi</p>
-                        </a>
+                        <?php if ($user): ?>
+                            <div class="tooltip-container">
+                                <p class="link-text">
+                                    <?php echo "Ciao, " . htmlspecialchars($user["nome"]); ?>
+                                </p>
+                                <div class="tooltip">
+                                    <h3 class="tooltip-title">Account</h3>
+                                    <ul class="action-list">
+                                        <li class="action-item" data-action="profile">
+                                            <span class="action-text">Profilo</span>
+                                        </li>
+                                        <li class="action-item" data-action="orders">
+                                            <span class="action-text">Ordini</span>
+                                        </li>
+                                        <li class="action-item" data-action="favorites">
+                                            <span class="action-text">Preferiti</span>
+                                        </li>
+                                        <li class="action-item" data-action="newsletter">
+                                            <span class="action-text">Posta in arrivo</span>
+                                        </li>
+                                        <li class="action-item" data-action="experience">
+                                            <span class="action-text">Esperienze</span>
+                                        </li>
+                                        <li class="action-item" data-action="settings">
+                                            <span class="action-text">Impostazioni account</span>
+                                        </li>
+                                        <li class="action-item" data-action="logout">
+                                            <span class="action-text">Esci</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <a class='link-item' href='/pages/login/login.php'>
+                                <p class='link-text'>Accedi</p>
+                            </a>
+                        <?php endif; ?>
                     </li>
                 </ul>
             </nav>
@@ -57,7 +118,7 @@
         <header id="shopping-header">
 
             <div class="swoosh">
-                <a class="link-item swoosh-link" href="#">
+                <a class="link-item swoosh-link" href="/">
                     <img class="link-img swoosh-icon" src="/assets/icons/icon.svg" alt="Nike" />
                 </a>
             </div>
@@ -65,7 +126,7 @@
             <nav id="shopping-navbar">
                 <ul class="desktop-shopping-category">
                     <li class="list-item">
-                        <a class="menu-hover-trigger-link" href="shop.php?section=news">Novità e in evidenza</a>
+                        <a class="menu-hover-trigger-link" href="/pages/shop/shop.php">Novità e in evidenza</a>
                     </li>
                     <li class="list-item">
                         <a class="menu-hover-trigger-link" href="men-category.php">Uomo</a>
@@ -123,14 +184,28 @@
                 </div>
 
                 <div class="icon-button favorites-button">
-                    <a href="#" class="link-item favorites-link">
+                    <a href="/pages/shop/favorites/favorites.php" class="link-item favorites-link">
                         <img src="/assets/icons/hearth-icon.svg" alt="Preferiti">
+                        <span
+                            class="counter-badge"
+                            id="favorites-counter"
+                            style="display: <?php echo isset($num_favorites) && $num_favorites > 0
+                                                ? "flex;" : "none;" ?>">
+                            <?php echo $num_favorites ?>
+                        </span>
                     </a>
                 </div>
 
                 <div class="icon-button cart-button">
-                    <a href="#" class="link-item cart-link">
+                    <a href="/pages/shop/cart/cart.php" class="link-item cart-link">
                         <img src="/assets/icons/cart-icon.svg" alt="Carrello">
+                        <span
+                            class="counter-badge"
+                            id="cart-counter"
+                            style="display: <?php echo isset($num_product_in_cart) && $num_product_in_cart > 0
+                                                ? "flex;" : "none;" ?>">
+                            <?php echo $num_product_in_cart ?>
+                        </span>
                     </a>
                 </div>
 

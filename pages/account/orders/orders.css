@@ -1,0 +1,43 @@
+.order-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.filter-btn.active {
+    background: #000;
+    color: white;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.order-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.status-delivered {
+    background: #e8f5e8;
+    color: #2d5a2d;
+}
+
+.status-shipping {
+    background: #fff3cd;
+    color: #856404;
+}

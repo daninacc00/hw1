@@ -1,126 +1,3 @@
-body {
-    font-family: "Roboto", sans-serif;
-    color: #111111;
-    background-color: #ffffff;
-    margin: 0;
-    padding: 0;
-}
-
-div {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
-}
-
-nav,
-header {
-    display: block;
-}
-
-fieldset,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-label,
-legend,
-li,
-p,
-span,
-strong,
-ul {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
-    font-family: "Roboto", sans-serif;
-    list-style: none;
-    list-style-type: none;
-}
-
-a {
-    color: #111111;
-    cursor: pointer;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-button {
-    box-sizing: border-box;
-    font-size: inherit;
-    border: none;
-    cursor: pointer;
-    line-height: inherit;
-    overflow: visible;
-    display: inline-flex;
-    margin: 0;
-    padding: 0;
-    text-transform: none;
-}
-
-.link-item {
-    cursor: pointer;
-}
-
-.icon-button {
-    cursor: pointer;
-    padding: 8px;
-    border: none;
-    outline: none;
-    background-color: inherit;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 20px;
-    height: 20px;
-}
-
-.icon-button:hover {
-    background-color: #E5E5E5;
-}
-
-.icon-button img {
-    margin-top: 4px;
-    width: 20px;
-    height: 20px;
-}
-
-.button, .chip{
-    vertical-align: top;
-    margin-left: 0;
-    margin-right: 6px;
-    margin-top: 12px;
-    max-width: 100%;
-    font: 500 1rem/1.5 'Roboto', sans-serif;
-    text-align: center;
-    text-decoration: none;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
-    padding: 6px 16px 6px;
-    min-height: 34px;
-    overflow: hidden;
-    background: #ffffff;
-    color: #111111;
-    border: none;
-    border-radius: 30px;
-    outline: none;
-}
-
-.button:hover, .chip:hover {
-    background-color: #CACACB;
-}
-
-
-
-
 #commerce-header {
     position: relative;
     margin: 0 auto;
@@ -175,6 +52,89 @@ button {
     }
 }
 
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    position: absolute;
+    top: 100%;
+    left: 0%;
+    transform: translateX(-70%);
+    margin-top: 10px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000;
+    min-width: 240px;
+    border: 1px solid #e0e0e0;
+}
+
+.tooltip-container:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tooltip-title {
+    padding: 16px 24px 0px 24px;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111111;
+}
+
+.action-list {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+}
+
+.action-item {
+    padding: 6px 24px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-item:hover {
+    background-color: #f8f9fa;
+}
+
+.action-item:active {
+    background-color: #e9ecef;
+}
+
+.action-text {
+    color: #111111;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .tooltip {
+        min-width: 180px;
+        left: 0;
+        right: 0;
+        margin: 10px auto 0;
+        transform: translateX(0);
+    }
+
+    .tooltip::before {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .tooltip-container:hover .tooltip {
+        transform: translateY(5px);
+    }
+}
+
+
 #shopping-header {
     position: relative;
     margin: 0 auto;
@@ -182,6 +142,10 @@ button {
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
+}
+
+.swoosh {
+    z-index: 100;
 }
 
 .swoosh-icon {
@@ -212,6 +176,8 @@ button {
 
 
 .user-tools-container {
+    z-index: 1;
+    gap: 8px;
     display: flex;
     align-items: center;
 }
@@ -316,7 +282,7 @@ button {
     max-width: 60%;
 }
 
-.search-results{
+.search-results {
     width: 100%;
     margin-top: 48px;
 }
@@ -403,4 +369,122 @@ button {
     #search-bar-container.search-open .desktop-search-bar {
         margin-left: 20px;
     }
+}
+
+.notification-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    min-width: 300px;
+    max-width: 400px;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+.notification-popup.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-popup.success {
+    border-left: 4px solid #10b981;
+}
+
+.notification-popup.error {
+    border-left: 4px solid #ef4444;
+}
+
+.popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.popup-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #111;
+    margin: 0;
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-close:hover {
+    color: #111;
+}
+
+.popup-message {
+    color: #666;
+    font-size: 14px;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+}
+
+.popup-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.popup-btn {
+    padding: 6px 12px;
+    border: 1px solid #e5e5e5;
+    background: white;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #111;
+    transition: all 0.2s ease;
+}
+
+.popup-btn:hover {
+    background: #f5f5f5;
+}
+
+.popup-btn.primary {
+    background: #111;
+    color: white;
+    border-color: #111;
+}
+
+.popup-btn.primary:hover {
+    background: #333;
+}
+
+/* Stili per counter badge */
+.counter-badge {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    background: #111;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
 }

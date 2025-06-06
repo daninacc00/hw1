@@ -1,0 +1,754 @@
+currentFilters = {
+  gender: [], // Default
+  section: null,
+  sport: [],
+  colors: [],
+  sizes: [],
+  min_price: null,
+  max_price: null,
+  shoe_height: null,
+  is_on_sale: false,
+  is_bestseller: false,
+  is_new_arrival: false,
+  sort: 'newest'
+};
+
+currentPage = 1;
+itemsPerPage = 20;
+totalProducts = 0;
+isLoading = false;
+
+init();
+
+function init() {
+  setupEventListeners();
+  loadInitialData();
+}
+
+function setupEventListeners() {
+  const sortBtn = document.querySelector('.sort-btn');
+  if (sortBtn) {
+    sortBtn.addEventListener('click', toggleSortMenu);
+  }
+
+  const filterBtn = document.querySelector('.filter-btn');
+  if (filterBtn) {
+    filterBtn.addEventListener('click', toggleFilters);
+  }
+
+  setupFilterSections();
+
+  window.addEventListener('scroll', () => handleScroll());
+
+  handleUrlParameters();
+}
+
+function setupFilterSections() {
+  const filterSections = document.querySelectorAll('.filter-section');
+
+  filterSections.forEach(section => {
+    const title = section.querySelector('.filter-title');
+    if (title) {
+      title.addEventListener('click', () => toggleFilterSection(section));
+    }
+  });
+
+  createFilterControls();
+}
+
+function createFilterControls() {
+  createGenderFilter();
+  createPriceFilter();
+  createSizeFilter();
+  createColorFilter();
+  createDiscountFilter();
+  createShoeHeightFilter();
+}
+
+function createGenderFilter() {
+  const genders = [
+    { name: 'Uomo', slug: 0 },
+    { name: 'Donna', slug: 1 },
+    { name: 'Unisex', slug: 2 },
+  ];
+
+  const genderTitle = [...document.querySelectorAll('.filter-section')]
+    .find(section => section.dataset.section === "gender");
+
+  if (genderTitle) {
+    const section = genderTitle.closest('.filter-section');
+    const content = document.createElement('div');
+    content.classList.add("filter-content");
+    content.classList.add("gender-filter");
+
+    const genderGrid = document.createElement("div");
+    genderGrid.classList.add("gender-grid");
+
+    genders.forEach(gender => {
+      const label = document.createElement("label");
+      label.classList.add("checkbox-label");
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = gender.slug.toString();
+
+      const text = document.createElement("span");
+      text.textContent = gender.name;
+
+      label.appendChild(checkbox);
+      label.appendChild(text);
+
+      content.appendChild(label);
+    })
+
+    section.appendChild(content);
+
+    const checkboxes = content.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => handleGenderFilter(checkbox));
+    });
+  }
+}
+
+function createPriceFilter() {
+  const priceTitle = [...document.querySelectorAll('.filter-section')]
+    .find(section => section.dataset.section === "price");
+
+  if (priceTitle) {
+    const section = priceTitle.closest('.filter-section');
+    const content = document.createElement('div');
+    content.classList.add("filter-content");
+    content.classList.add("price-filter");
+
+    const priceInputs = document.createElement("div");
+    priceInputs.classList.add("price-inputs");
+
+    const minInput = document.createElement("input")
+    minInput.type = "number";
+    minInput.id = "min-price";
+    minInput.placeholder = "Minimo €"
+    minInput.min = "0"
+
+    const maxInput = document.createElement("input")
+    maxInput.type = "number";
+    maxInput.id = "max-price";
+    maxInput.placeholder = "Massimo €"
+    maxInput.min = "0"
+
+    priceInputs.appendChild(minInput);
+    priceInputs.appendChild(maxInput);
+
+    const applyBtn = document.createElement("button");
+    applyBtn.classList.add("apply-price-btn");
+    applyBtn.textContent = "Applica";
+    applyBtn.addEventListener("click", applyPriceFilter);
+
+    content.appendChild(priceInputs);
+    content.appendChild(applyBtn);
+
+    section.appendChild(content);
+  }
+}
+
+function createSizeFilter() {
+  const sizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
+  const sizeTitle = [...document.querySelectorAll('.filter-section')]
+    .find(section => section.dataset.section === "size");
+
+  if (sizeTitle) {
+    const section = sizeTitle.closest('.filter-section');
+    const content = document.createElement('div');
+
+    content.classList.add("filter-content");
+    content.classList.add("size-filter");
+
+    const sizeGrid = document.createElement("div");
+    sizeGrid.classList.add("size-grid");
+
+    sizes.forEach(size => {
+      const sizeBtn = document.createElement("button");
+      sizeBtn.classList.add("size-btn");
+      sizeBtn.setAttribute("data-size", size);
+      sizeBtn.textContent = size;
+
+      sizeGrid.appendChild(sizeBtn);
+    })
+
+    content.appendChild(sizeGrid);
+    section.appendChild(content);
+
+    // Event listeners
+    const sizeButtons = content.querySelectorAll('.size-btn');
+    sizeButtons.forEach(btn => {
+      btn.addEventListener('click', () => toggleSize(btn));
+    });
+  }
+}
+
+function createColorFilter() {
+  const colors = [
+    { name: 'Nero', hex: '#000000', slug: 'black' },
+    { name: 'Bianco', hex: '#FFFFFF', slug: 'white' },
+    { name: 'Rosso', hex: '#FF0000', slug: 'red' },
+    { name: 'Blu', hex: '#0000FF', slug: 'blue' },
+    { name: 'Verde', hex: '#008000', slug: 'green' },
+    { name: 'Grigio', hex: '#808080', slug: 'gray' }
+  ];
+
+  const colorTitle = [...document.querySelectorAll('.filter-section')]
+    .find(section => section.dataset.section === "color");
+
+  if (colorTitle) {
+    const section = colorTitle.closest('.filter-section');
+    const content = document.createElement('div');
+
+    content.classList.add("filter-content");
+    content.classList.add("color-filter");
+
+    const colorGrid = document.createElement("div");
+    colorGrid.classList.add("color-grid");
+
+    colors.forEach(color => {
+      const colorItem = document.createElement("div");
+      colorItem.classList.add("color-item");
+
+      const colorCircle = document.createElement("div");
+      colorCircle.classList.add("color-circle");
+      colorCircle.style.backgroundColor = color.hex;
+
+      const colorLabel = document.createElement("div");
+      colorLabel.classList.add("color-label");
+      colorLabel.textContent = color.name;
+
+      colorItem.setAttribute("data-color", color.slug);
+      colorItem.title = color.name;
+
+      colorItem.appendChild(colorCircle);
+      colorItem.appendChild(colorLabel);
+      colorGrid.appendChild(colorItem);
+    });
+
+    content.appendChild(colorGrid);
+    section.appendChild(content);
+
+    // Event listeners
+    const colorButtons = content.querySelectorAll('.color-item');
+    colorButtons.forEach(btn => {
+      btn.addEventListener('click', () => toggleColor(btn));
+    });
+  }
+}
+
+function createDiscountFilter() {
+  const discounts = [
+    { name: "In offerta", slug: "on-sale" },
+    { name: "Bestseller", slug: "bestseller" },
+    { name: "Nuovi arrivi", slug: "new-arrival" },
+  ]
+  const discountTitle = [...document.querySelectorAll('.filter-section')]
+    .find(section => section.dataset.section === "discount");
+
+  if (discountTitle) {
+    const section = discountTitle.closest('.filter-section');
+    const content = document.createElement('div');
+
+    content.classList.add("filter-content");
+    content.classList.add("discount-filter");
+
+    discounts.forEach(discount => {
+      const label = document.createElement("label");
+      label.classList.add("checkbox-label");
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = discount.slug;
+
+      const text = document.createElement("span");
+      text.textContent = discount.name;
+
+      label.appendChild(checkbox);
+      label.appendChild(text);
+
+      content.appendChild(label);
+    })
+
+    section.appendChild(content);
+
+    // Event listeners
+    const checkboxes = content.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => handleDiscountFilter(checkbox));
+    });
+  }
+}
+
+function createShoeHeightFilter() {
+  const heights = ['low', 'mid', 'high'];
+  const heightLabels = { low: 'Basse', mid: 'Medie', high: 'Alte' };
+
+  const heightTitle = [...document.querySelectorAll('.filter-section')]
+    .find(section => section.dataset.section === "height");
+
+  if (heightTitle) {
+    const section = heightTitle.closest('.filter-section');
+    const content = document.createElement('div');
+
+    content.classList.add("filter-content");
+    content.classList.add("height-filter");
+
+    const heightOptions = document.createElement("div");
+    heightOptions.classList.add("height-options");
+
+    heights.forEach(height => {
+      const label = document.createElement("label");
+      label.classList.add("radio-label");
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "shoe-height";
+      input.value = height;
+
+      const title = document.createElement("span");
+      title.textContent = heightLabels[height];
+
+      label.appendChild(input);
+      label.appendChild(title);
+
+      heightOptions.appendChild(label);
+    })
+
+    content.appendChild(heightOptions);
+    section.appendChild(content);
+
+    // Event listeners
+    const radios = content.querySelectorAll('input[type="radio"]');
+    radios.forEach(radio => {
+      radio.addEventListener('change', () => handleHeightFilter(radio));
+    });
+  }
+}
+
+function toggleFilterSection(section) {
+  const content = section.querySelector('.filter-content');
+  const chevron = section.querySelector('img');
+
+  if (content) {
+    content.classList.toggle('open');
+    if (chevron) {
+      chevron.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : '';
+    }
+  }
+}
+
+function handleGenderFilter(checkbox) {
+  const filterId = parseInt(checkbox.id);
+
+  const index = currentFilters.gender.indexOf(filterId);
+  if (index > -1) {
+    currentFilters.gender.splice(index, 1);
+  } else {
+    currentFilters.gender.push(filterId);
+  }
+
+  applyFilters();
+}
+
+function toggleSize(btn) {
+  const size = btn.dataset.size;
+  btn.classList.toggle('selected');
+
+  const index = currentFilters.sizes.indexOf(size);
+  if (index > -1) {
+    currentFilters.sizes.splice(index, 1);
+  } else {
+    currentFilters.sizes.push(size);
+  }
+
+  applyFilters();
+}
+
+function toggleColor(btn) {
+  const color = btn.dataset.color;
+  btn.classList.toggle('selected');
+
+  const index = currentFilters.colors.indexOf(color);
+  if (index > -1) {
+    currentFilters.colors.splice(index, 1);
+  } else {
+    currentFilters.colors.push(color);
+  }
+
+  applyFilters();
+}
+
+function applyPriceFilter() {
+  const minPrice = document.getElementById('min-price')?.value;
+  const maxPrice = document.getElementById('max-price')?.value;
+
+  currentFilters.min_price = minPrice ? parseFloat(minPrice) : null;
+  currentFilters.max_price = maxPrice ? parseFloat(maxPrice) : null;
+
+  applyFilters();
+}
+
+function handleDiscountFilter(checkbox) {
+  const filterId = checkbox.id.replace('-', '_');
+  currentFilters[`is_${filterId}`] = checkbox.checked;
+  applyFilters();
+}
+
+function handleHeightFilter(radio) {
+  currentFilters.shoe_height = radio.checked ? radio.value : null;
+  applyFilters();
+}
+
+function toggleSortMenu() {
+  let sortMenu = document.querySelector('.sort-menu');
+  if (!sortMenu) {
+    createSortMenu();
+    sortMenu = document.querySelector('.sort-menu');
+  }
+
+  sortMenu.classList.toggle('open');
+}
+
+function createSortMenu() {
+  const sortBtn = document.querySelector('.sort-btn');
+  const sortOptions = [
+    { value: 'newest', label: 'Più recenti' },
+    { value: 'price_asc', label: 'Prezzo: dal più basso' },
+    { value: 'price_desc', label: 'Prezzo: dal più alto' },
+    { value: 'name_asc', label: 'Nome: A-Z' },
+    { value: 'name_desc', label: 'Nome: Z-A' },
+    { value: 'rating', label: 'Valutazione più alta' }
+  ];
+
+  const menu = document.createElement('div');
+  menu.className = 'sort-menu';
+
+  sortOptions.forEach(option => {
+    const sortOption = document.createElement("div");
+    sortOption.classList.add("sort-option");
+    sortOption.setAttribute("data-sort", option.value);
+    sortOption.textContent = option.label
+    menu.appendChild(sortOption);
+  })
+
+  sortBtn.parentNode.appendChild(menu);
+
+  menu.querySelectorAll('.sort-option').forEach(option => {
+    option.addEventListener('click', () => changeSortOrder(option.dataset.sort));
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sort-btn') && !e.target.closest('.sort-menu')) {
+      menu.classList.remove('open');
+    }
+  });
+}
+
+function changeSortOrder(sortValue) {
+  currentFilters.sort = sortValue;
+  currentPage = 1;
+  applyFilters();
+
+  // Close menu
+  document.querySelector('.sort-menu')?.classList.remove('open');
+}
+
+// Filter toggle
+function toggleFilters() {
+  const filters = document.querySelector('.filters');
+  const btn = document.querySelector('.filter-btn');
+
+  filters.classList.toggle('hidden');
+  btn.textContent = filters.classList.contains('hidden') ? 'Mostra filtri' : 'Nascondi filtri';
+}
+
+// Data loading
+function loadInitialData() {
+  loadProducts();
+}
+
+function loadProducts(append = false) {
+  if (isLoading) return;
+
+  isLoading = true;
+  showLoading();
+
+  const params = buildApiParams();
+  fetch(`/api/shop/getProducts.php?${params}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        if (append) {
+          appendProducts(data.data.products);
+        } else {
+          renderProducts(data.data.products);
+          updateCategoryTitle();
+        }
+
+        // totalProducts = data.data.pagination.total;
+        updatePaginationInfo(data.data.pagination);
+      } else {
+        showError(data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error loading products:', error);
+      showError('Errore nel caricamento dei prodotti');
+    })
+    .finally(() => {
+      isLoading = false;
+      hideLoading();
+    })
+}
+
+function buildApiParams() {
+  const params = new URLSearchParams();
+
+  Object.entries(currentFilters).forEach(([key, value]) => {
+    if (value !== null && value !== false && value !== '') {
+      if (Array.isArray(value) && value.length > 0) {
+        value.forEach(v => params.append(`${key}[]`, v));
+      } else if (!Array.isArray(value)) {
+        params.set(key, value);
+      }
+    }
+  });
+
+  params.set('page', currentPage);
+  params.set('limit', itemsPerPage);
+
+  return params.toString();
+}
+
+function renderProducts(products) {
+  const grid = document.getElementById('product-grid');
+  if (!grid) return;
+
+  if (products.length === 0) {
+    grid.innerHTML = '<div class="no-products">Nessun prodotto trovato</div>';
+    return;
+  }
+
+  products.forEach(product => {
+    const productCard = createProductCard(product);
+    grid.appendChild(productCard);
+  })
+}
+
+function appendProducts(products) {
+  const grid = document.getElementById('product-grid');
+  if (!grid) return;
+
+  products.forEach(product => {
+    const productCard = createProductCard(product);
+    grid.appendChild(productCard);
+  })
+}
+
+function createProductCard(product) {
+  const card = document.createElement('div');
+  card.className = 'product-card';
+  card.dataset.productId = product.id;
+
+  const productLink = document.createElement('a');
+  productLink.href = `detail/detail.php?id=${product.id}`;
+  productLink.className = 'product-link';
+  productLink.style.textDecoration = 'none';
+  productLink.style.color = 'inherit';
+
+  // Product image container
+  const imageContainer = document.createElement('div');
+  imageContainer.className = 'product-image';
+
+  const img = document.createElement('img');
+  img.src = product.primary_image || '/assets/images/placeholder.jpg';
+  img.alt = product.name;
+  imageContainer.appendChild(img);
+
+  // card.appendChild(imageContainer);
+
+  // Product info
+  const info = document.createElement('div');
+  info.className = 'product-info';
+
+  const badgesContainer = document.createElement('div');
+  badgesContainer.className = 'product-badges';
+
+  if (product.is_new_arrival == 1) {
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = 'Nuovi arrivi';
+    badgesContainer.appendChild(badge);
+  }
+
+  if (product.is_bestseller == 1) {
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = 'Bestseller';
+    badgesContainer.appendChild(badge);
+  }
+  info.appendChild(badgesContainer);
+
+  const name = document.createElement('h3');
+  name.className = 'product-name';
+  name.textContent = product.name;
+  info.appendChild(name);
+
+  const category = document.createElement('p');
+  category.className = 'product-category';
+  category.textContent = product.category_name || product.sport_name;
+  info.appendChild(category);
+
+  if (product.color_count > 1) {
+    const colorCount = document.createElement('p');
+    colorCount.className = 'color-count';
+    colorCount.textContent = `${product.color_count} colori`;
+    info.appendChild(colorCount);
+  }
+
+  const ratingDiv = document.createElement('div');
+  ratingDiv.className = 'product-rating';
+
+  const starsHTML = renderStars(product.rating);
+  const starsFragment = document.createRange().createContextualFragment(starsHTML);
+  ratingDiv.appendChild(starsFragment);
+
+  const ratingCount = document.createElement('span');
+  ratingCount.className = 'rating-count';
+  ratingCount.textContent = `(${product.rating_count})`;
+  ratingDiv.appendChild(ratingCount);
+
+  info.appendChild(ratingDiv);
+
+  const priceDiv = document.createElement('div');
+  priceDiv.className = 'product-price';
+
+  const currentPrice = document.createElement('span');
+  currentPrice.className = 'current-price';
+  currentPrice.textContent = `€${product.price}`;
+  priceDiv.appendChild(currentPrice);
+
+  if (product.original_price > product.price && product.is_on_sale == 1) {
+    const originalPrice = document.createElement('span');
+    originalPrice.className = 'original-price';
+    originalPrice.textContent = `€${product.original_price}`;
+
+    priceDiv.appendChild(originalPrice);
+
+    if (product.discount_percentage > 0) {
+      const discount = document.createElement("span")
+      discount.classList.add("discount");
+      discount.textContent = `-${product.discount_percentage}%`
+      priceDiv.appendChild(discount);
+    }
+  }
+
+  info.appendChild(priceDiv);
+
+  productLink.appendChild(imageContainer);
+  productLink.appendChild(info);
+
+  card.appendChild(productLink);
+
+  return card;
+}
+
+function renderStars(rating) {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  return '★'.repeat(fullStars) +
+    (hasHalfStar ? '☆' : '') +
+    '☆'.repeat(emptyStars);
+}
+
+function applyFilters() {
+  currentPage = 1;
+  loadProducts();
+  updateUrl();
+}
+
+
+// Infinite scroll
+function handleScroll() {
+  if (isLoading) return;
+
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+  if (scrollTop + clientHeight >= scrollHeight - 1000) {
+    const totalPages = Math.ceil(totalProducts / itemsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      loadProducts(true);
+    }
+  }
+}
+
+// UI Helpers
+function showLoading() {
+  const grid = document.getElementById('product-grid');
+  if (currentPage === 1) {
+    grid.innerHTML = '<div class="loading">Caricamento...</div>';
+  } else {
+    grid.insertAdjacentHTML('beforeend', '<div class="loading">Caricamento...</div>');
+  }
+}
+
+function hideLoading() {
+  document.querySelectorAll('.loading').forEach(el => el.remove());
+}
+
+function showError(message) {
+  const grid = document.getElementById('product-grid');
+  grid.innerHTML = `<div class="error">${message}</div>`;
+}
+
+function updateCategoryTitle() {
+  const title = document.getElementById('categoryTitle');
+  if (title) {
+    // Update based on current filters
+    let newTitle = 'Sneakers e scarpe';
+    if (currentFilters.gender === 'men') newTitle += ' da uomo';
+    else if (currentFilters.gender === 'women') newTitle += ' da donna';
+    else if (currentFilters.gender === 'kids') newTitle += ' per bambini';
+
+    title.textContent = newTitle;
+  }
+}
+
+function updatePaginationInfo(pagination) {
+  // Update pagination info if needed
+  // console.log(`Showing ${pagination.current_page * pagination.per_page} of ${pagination.total} products`);
+}
+
+// URL management
+function handleUrlParameters() {
+  const urlParams = new URLSearchParams(window.location.search);
+
+  // Apply URL parameters to filters
+  if (urlParams.get('gender')) currentFilters.gender = urlParams.get('gender');
+  if (urlParams.get('section')) currentFilters.section = urlParams.get('section');
+  if (urlParams.get('sport')) currentFilters.sport = [urlParams.get('sport')];
+  // Add more URL parameter handling as needed
+}
+
+function updateUrl() {
+  const params = new URLSearchParams();
+
+  Object.entries(currentFilters).forEach(([key, value]) => {
+    if (value !== null && value !== false && value !== '' &&
+      (Array.isArray(value) ? value.length > 0 : true)) {
+      if (Array.isArray(value)) {
+        params.set(key, value.join(','));
+      } else {
+        params.set(key, value);
+      }
+    }
+  });
+
+  const newUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.replaceState({}, '', newUrl);
+}

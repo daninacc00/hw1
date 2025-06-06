@@ -102,7 +102,7 @@ class User
     public function getUtenteById($id)
     {
         $id = (int)$id; // Cast a intero per sicurezza
-        $sql = "SELECT id_utente, username, email, nome, cognome, data_registrazione, ultimo_accesso, stato_account 
+        $sql = "SELECT * 
                 FROM utenti WHERE id_utente = $id";
 
         $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));

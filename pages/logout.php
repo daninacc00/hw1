@@ -8,5 +8,5 @@ require_once __DIR__ . '/../includes/auth.php';
 logoutUser();
 
 // Reindirizza alla pagina di login
-redirect('/pages/login/login.php');
+redirect('/index.php');
 ?>

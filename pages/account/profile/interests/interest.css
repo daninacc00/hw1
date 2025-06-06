@@ -1,0 +1,206 @@
+/* Stili per la modale */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+}
+
+.modal-category-tabs {
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid #eee;
+    padding: 0 10px;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.modal-category-tab {
+    padding: 12px 16px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.modal-category-tab.active {
+    color: #000;
+    border-bottom: 2px solid #000;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 10px 0;
+    overflow-y: auto;
+    max-height: 60vh;
+    position: relative;
+}
+
+.modal-loading {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    font-weight: 500;
+}
+
+.modal-interests-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-interest-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.modal-interest-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.modal-interest-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modal-interest-name {
+    flex-grow: 1;
+    font-size: 0.95rem;
+}
+
+.modal-interest-checkbox {
+    margin-left: 10px;
+}
+
+.modal-interest-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 20px;
+    border-top: 1px solid #eee;
+    gap: 10px;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.modal-cancel {
+    background-color: white;
+    border: 1px solid #ddd;
+    color: #333;
+}
+
+.modal-save {
+    background-color: #000;
+    border: 1px solid #000;
+    color: white;
+}
+
+.modal-cancel:hover {
+    background-color: #f5f5f5;
+}
+
+.modal-save:hover {
+    background-color: #333;
+}
+
+/* Stili per i messaggi di notifica */
+.message {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    border-radius: 5px;
+    z-index: 1100;
+    font-size: 0.9rem;
+    font-weight: 500;
+    animation: fadeIn 0.3s, fadeOut 0.3s 4.7s;
+}
+
+.success-message {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.error-message {
+    background-color: #f44336;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadeOut {
+    from {opacity: 1;}
+    to {opacity: 0;}
+}

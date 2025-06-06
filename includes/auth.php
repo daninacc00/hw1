@@ -9,7 +9,7 @@
  * @return bool True se l'utente è loggato, false altrimenti
  */
 function isLoggedIn() {
-    return isset($_SESSION['utente_id']);
+    return isset($_SESSION['user_id']);
 }
 
 /**
@@ -22,7 +22,7 @@ function getCurrentUser() {
         return null;
     }
     
-    $userId = $_SESSION['utente_id'];
+    $userId = $_SESSION['user_id'];
     
     // In un'implementazione reale questo recupererebbe l'utente dal database
     // foreach ($_SESSION['users'] as $user) {
@@ -133,7 +133,7 @@ function authenticateUser($username, $password) {
  */
 function logoutUser() {
     // Elimina la variabile di sessione utente_id
-    unset($_SESSION['utente_id']);
+    unset($_SESSION['user_id']);
     
     // Opzionale: distruggi completamente la sessione
     // session_destroy();

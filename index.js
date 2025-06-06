@@ -1,4 +1,3 @@
-// JavaScript modificato per caricare dati tramite API
 let sliderImages = [];
 let currentIndex = 0;
 const itemsPerPage = 3;
@@ -8,11 +7,9 @@ const container = document.getElementById("slider-container");
 const prevButton = document.querySelector(".slider-controls .slider-btn.prev");
 const nextButton = document.querySelector(".slider-controls .slider-btn.next");
 
-// Inizializzazione dei bottoni
 prevButton.innerHTML = "&#10094;";
 nextButton.innerHTML = "&#10095;";
 
-// Funzione per caricare le immagini dall'API
 async function loadSliderImages() {
     fetch('/api/slider-images.php')
         .then(response => {
@@ -36,10 +33,7 @@ async function loadSliderImages() {
                 return;
             }
 
-            // Crea lo slider con i dati caricati
             createSlider();
-
-            // Inizializza lo slider
             updateSlider();
         })
         .catch(error => {
@@ -48,7 +42,6 @@ async function loadSliderImages() {
         });
 }
 
-// Funzione per creare lo slider
 function createSlider() {
     const sliderWrapper = document.createElement("div");
     sliderWrapper.classList.add("slider-wrapper");
@@ -92,7 +85,6 @@ function createSlider() {
     container.appendChild(sliderWrapper);
 }
 
-// Funzione per aggiornare lo slider
 function updateSlider() {
     const sliderTrack = document.querySelector(".slider-track");
 
