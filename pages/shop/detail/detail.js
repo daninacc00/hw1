@@ -396,11 +396,23 @@ async function addToCart() {
                 'Il prodotto è stato aggiunto al tuo carrello.',
                 [
                     { text: 'Continua shopping', url: '#', primary: false },
-                    { text: 'Vai al carrello', url: '/cart', primary: true }
+                    { text: 'Vai al carrello', url: '/pages/shop/cart/cart.php', primary: true }
                 ]
             );
         } else {
-            showErrorMessage(result.message || 'Errore durante l\'aggiunta al carrello');
+            // Gestisci errori di autenticazione
+            if (result.error_type === 'auth_required') {
+                showNotificationPopup(
+                    'error',
+                    'Accesso richiesto',
+                    result.message,
+                    [
+                        { text: 'Accedi', url: result.redirect_url, primary: true }
+                    ]
+                );
+            } else {
+                showErrorMessage(result.message || 'Errore durante l\'aggiunta al carrello');
+            }
         }
     } catch (error) {
         console.error('Errore nella richiesta:', error);
@@ -458,12 +470,24 @@ async function addFavorite() {
                 'Aggiunto ai preferiti',
                 'Il prodotto è stato aggiunto ai tuoi preferiti.',
                 [
-                    { text: 'Vai ai preferiti', url: '/favorites', primary: true }
+                    { text: 'Vai ai preferiti', url: '/pages/shop/favorites/favorites.php', primary: true }
                 ]
             );
             updateFavoritesCounter(1);
         } else {
-            showErrorMessage(result.message || 'Errore durante l\'aggiunta ai preferiti');
+            // Gestisci errori di autenticazione
+            if (result.error_type === 'auth_required') {
+                showNotificationPopup(
+                    'error',
+                    'Accesso richiesto',
+                    result.message,
+                    [
+                        { text: 'Accedi', url: result.redirect_url, primary: true }
+                    ]
+                );
+            } else {
+                showErrorMessage(result.message || 'Errore durante l\'aggiunta ai preferiti');
+            }
         }
     } catch (error) {
         console.error('Errore nella richiesta:', error);
@@ -504,7 +528,19 @@ async function removeFavorite() {
                 'Il prodotto è stato rimosso dai tuoi preferiti.'
             );
         } else {
-            showErrorMessage(result.message || 'Errore durante la rimozione dai preferiti');
+            // Gestisci errori di autenticazione
+            if (result.error_type === 'auth_required') {
+                showNotificationPopup(
+                    'error',
+                    'Accesso richiesto',
+                    result.message,
+                    [
+                        { text: 'Accedi', url: result.redirect_url, primary: true }
+                    ]
+                );
+            } else {
+                showErrorMessage(result.message || 'Errore durante la rimozione dai preferiti');
+            }
         }
     } catch (error) {
         console.error('Errore nella richiesta:', error);

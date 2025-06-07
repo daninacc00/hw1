@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . '/../../../includes/config.php';
 require_once __DIR__ . '/../../../classes/Cart.php';
 require_once __DIR__ . '/../../../classes/Product.php';
@@ -13,26 +12,22 @@ if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
 
 $userId = $_SESSION['user_id'] ?? null;
 if (!isset($userId)) {
-    echo json_encode([
-        'success' => false,
-        'message' => "Devi essere loggato per accedere al tuo carrello",
-        'error_type' => 'auth_required',
-        'redirect_url' => '/pages/login/login.php'
-    ]);
+    echo json_encode(['success' => false, 'message' => "Devi essere loggato per accedere al tuo carrello"]);
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
-$productId = $data['productId'] ?? null;
+$data = json_decode(file_get_contents("php://input"), true);
+$cartItemId = $data['cartItemId'] ?? null;
 
-if (!isset($productId)) {
-    echo json_encode(['success' => false, 'message' => "ID prodotto mancante"]);
+if (!isset($cartItemId)) {
+    echo json_encode(['success' => false, 'message' => "ID elemento carrello mancante"]);
     exit;
 }
 
 $product = new Product();
 $cart = new Cart($product);
-$result = $cart->removeAllProductsById($userId, $productId);
+$result = $cart->removeCartItem($userId, $cartItemId);
 echo json_encode($result);
 
 exit;
+?>

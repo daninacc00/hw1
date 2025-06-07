@@ -10,15 +10,23 @@ $userManager = new User();
 $favorites = new Favorites();
 $cart = new Cart();
 
-$user_id = $_SESSION['user_id'] ?? 1;
+$user_id = $_SESSION['user_id'] ?? null;
 
-$num_favorites = null;
-$num_product_in_cart = null;
+$num_favorites = 0;
+$num_product_in_cart = 0;
 $user = null;
-if (isLoggedIn()) {
-    $user = $userManager->getUtenteById($user_id);
-    $num_favorites = $favorites->getNumOfFavorites($user_id);
-    $num_product_in_cart = $cart->getNumOfProductInCart($user_id);
+
+if (isLoggedIn() && $user_id) {
+    try {
+        $user = $userManager->getUtenteById($user_id);
+        $num_favorites = $favorites->getNumOfFavorites($user_id);
+        $num_product_in_cart = $cart->getNumOfProductInCart($user_id);
+    } catch (Exception $e) {
+        // Se c'è un errore nel recupero dei dati, logga l'errore ma non bloccare la pagina
+        error_log("Errore nel caricamento dati utente: " . $e->getMessage());
+        $num_favorites = 0;
+        $num_product_in_cart = 0;
+    }
 }
 
 ?>
@@ -189,8 +197,7 @@ if (isLoggedIn()) {
                         <span
                             class="counter-badge"
                             id="favorites-counter"
-                            style="display: <?php echo isset($num_favorites) && $num_favorites > 0
-                                                ? "flex;" : "none;" ?>">
+                            style="display: <?php echo (isLoggedIn() && $num_favorites > 0) ? "flex;" : "none;" ?>">
                             <?php echo $num_favorites ?>
                         </span>
                     </a>
@@ -202,8 +209,7 @@ if (isLoggedIn()) {
                         <span
                             class="counter-badge"
                             id="cart-counter"
-                            style="display: <?php echo isset($num_product_in_cart) && $num_product_in_cart > 0
-                                                ? "flex;" : "none;" ?>">
+                            style="display: <?php echo (isLoggedIn() && $num_product_in_cart > 0) ? "flex;" : "none;" ?>">
                             <?php echo $num_product_in_cart ?>
                         </span>
                     </a>

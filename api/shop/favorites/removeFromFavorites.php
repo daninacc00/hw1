@@ -13,7 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
 
 $userId = $_SESSION['user_id'] ?? null;
 if (!isset($userId)) {
-    echo json_encode(['success' => false, 'message' => "Devi essere loggato per accedere ai tuoi preferiti"]);
+    echo json_encode([
+        'success' => false,
+        'message' => "Devi essere loggato per accedere ai tuoi preferiti",
+        'error_type' => 'auth_required',
+        'redirect_url' => '/pages/login/login.php'
+    ]);
     exit;
 }
 
