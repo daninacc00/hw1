@@ -9,18 +9,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Validazione input
 if (empty($_POST['username']) || empty($_POST['password'])) {
     echo json_encode(['success' => false, 'message' => 'Username/Email e password sono obbligatori']);
     exit;
 }
 
-// Login utente
 $user = new User();
 $result = $user->login(trim($_POST['username']), $_POST['password']);
 
 if ($result['success']) {
-    // Salva dati utente in sessione
     $_SESSION['user_id'] = $result['utente']['id_utente'];
     $_SESSION['username'] = $result['utente']['username'];
     $_SESSION['nome_completo'] = $result['utente']['nome'] . ' ' . $result['utente']['cognome'];

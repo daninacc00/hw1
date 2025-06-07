@@ -1,20 +1,9 @@
-:root {
-    --secondary-color: #f5f5f5;
-    --text-color: #111;
-    --font-family: 'Helvetica Neue', Arial, sans-serif;
-}
-
-* {
+body {
+    font-family: "Roboto", sans-serif;
+    color: #111111;
+    background-color: #ffffff;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: var(--font-family);
-    background-color: white;
-    color: var(--text-color);
-    line-height: 1.6;
 }
 
 div {
@@ -101,8 +90,7 @@ button {
     height: 20px;
 }
 
-.button,
-.chip {
+.button, .chip{
     vertical-align: top;
     margin-left: 0;
     margin-right: 6px;
@@ -127,8 +115,8 @@ button {
     outline: none;
 }
 
-.button:hover,
-.chip:hover {
+.button:hover, .chip:hover {
     background-color: #CACACB;
 }
+
 

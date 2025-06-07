@@ -1,5 +1,7 @@
 const passwordField = document.getElementById('password');
 const confirmField = document.getElementById('password_confirm');
+const registerForm = document.getElementById('registerForm');
+registerForm.addEventListener('submit', handleRegister);
 
 if (passwordField) {
     passwordField.addEventListener('input', function () {
@@ -20,7 +22,6 @@ if (confirmField && passwordField) {
 function validate() {
     let isValid = true;
 
-    // Validazione username
     const username = document.getElementById('username');
     if (username.value.trim() === '') {
         showError(username, 'Username è obbligatorio');
@@ -30,11 +31,8 @@ function validate() {
         isValid = false;
     } else {
         removeError(username);
-
-        //TODO: Verificare se l'username è già in uso (simulazione)
     }
 
-    // Validazione email
     const email = document.getElementById('email');
     if (email.value.trim() === '') {
         showError(email, 'Email è obbligatoria');
@@ -46,7 +44,6 @@ function validate() {
         removeError(email);
     }
 
-    // Validazione password
     if (passwordField.value === '') {
         showError(passwordField, 'Password è obbligatoria');
         isValid = false;
@@ -57,7 +54,6 @@ function validate() {
         removeError(passwordField);
     }
 
-    // Validazione conferma password
     if (confirmField.value === '') {
         showError(confirmField, 'Conferma password è obbligatoria');
         isValid = false;
@@ -108,7 +104,7 @@ function handleRegister(e) {
 
     const formData = new FormData(this);
 
-    fetch('/api/registration.php', {
+    fetch('/api/auth/registration.php', {
         method: 'POST',
         body: formData
     })
@@ -116,6 +112,3 @@ function handleRegister(e) {
         .then(onResponse)
         .catch(onError);
 }
-
-const registerForm = document.getElementById('registerForm');
-registerForm.addEventListener('submit', handleRegister);

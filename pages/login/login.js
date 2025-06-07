@@ -59,7 +59,7 @@ function handleLogin(e) {
 
     const formData = new FormData(this);
 
-    fetch('/api/login.php', {
+    fetch('/api/auth/login.php', {
         method: 'POST',
         body: formData
     })

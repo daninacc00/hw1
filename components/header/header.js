@@ -1,3 +1,36 @@
+// --------------- [SEARCH BAR]---------------------------
+
+function onOpenSearch(event) {
+    const container = event.currentTarget;
+    container.classList.add("search-open");
+
+    document.body.style.overflow = 'hidden';
+    document.addEventListener("click", onCloseSearchOutside);
+}
+
+function onCloseSearch(event) {
+    event.stopPropagation();
+    let container = document.querySelector("#search-bar-container");
+    container.classList.remove("search-open");
+
+  document.body.style.overflow = 'auto';
+    document.removeEventListener("click", onCloseSearchOutside);
+}
+
+function onCloseSearchOutside(event) {
+    let container = document.querySelector("#search-bar-container");
+    if (!container.contains(event.target)) {
+        onCloseSearch(event);
+    }
+}
+
+let searchBarContainer = document.querySelector("#search-bar-container");
+searchBarContainer.addEventListener("click", onOpenSearch);
+
+let closeSearch = document.querySelector(".close-search-btn");
+closeSearch.addEventListener("click", onCloseSearch);
+
+
 function handleAction(action) {
     switch (action) {
         case 'profile':

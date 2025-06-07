@@ -9,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Validazione input
 $requiredFields = ['username', 'email', 'password', 'nome', 'cognome'];
 $errors = [];
 
@@ -19,7 +18,6 @@ foreach ($requiredFields as $field) {
     }
 }
 
-// Validazioni specifiche
 if (!empty($_POST['email']) && !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
     $errors[] = "Formato email non valido";
 }
@@ -37,7 +35,6 @@ if (!empty($errors)) {
     exit;
 }
 
-// Registrazione utente
 $user = new User();
 
 $result = $user->register(
