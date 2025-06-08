@@ -14,9 +14,6 @@ class Favorites
         $this->product = $product;
     }
 
-    /**
-     * Aggiunge un prodotto ai preferiti
-     */
     public function addProduct($userId, $productId)
     {
         if (!$userId || !$productId) {
@@ -41,9 +38,6 @@ class Favorites
         return $this->insertFavorite($userId, $productId, $productData['data']);
     }
 
-    /**
-     * Rimuove un prodotto dai preferiti
-     */
     public function removeProduct($userId, $productId)
     {
         $userId = mysqli_real_escape_string($this->conn, $userId);
@@ -81,9 +75,6 @@ class Favorites
         ];
     }
 
-    /**
-     * Ottiene la lista dei prodotti preferiti di un utente
-     */
     public function getUserFavorites($userId)
     {
         if (!$userId) {
@@ -116,7 +107,6 @@ class Favorites
 
         $favorites = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            // Convertiamo il risultato della query in boolean
             $row['isInCart'] = (bool)$row['isInCart'];
             $favorites[] = $row;
         }
@@ -128,9 +118,6 @@ class Favorites
         ];
     }
 
-    /**
-     * Verifica se un prodotto è nei preferiti dell'utente
-     */
     public function isProductFavorite($userId, $productId)
     {
         if (!$userId || !$productId) {
@@ -145,10 +132,6 @@ class Favorites
         ];
     }
 
-
-    /**
-     * Verifica se il prodotto è già nei preferiti
-     */
     public function isProductInUserFavorites($userId, $productId)
     {
         if (!isset($userId))
@@ -164,9 +147,6 @@ class Favorites
         return isset($row);
     }
 
-    /**
-     * Restituisce il numero dei preferiti dell'utente
-     */
     public function getNumOfFavorites($userId)
     {
         $userId = mysqli_real_escape_string($this->conn, $userId);
@@ -178,9 +158,6 @@ class Favorites
         return $row["num_favorites"];
     }
 
-    /**
-     * Inserisce un nuovo preferito
-     */
     private function insertFavorite($userId, $productId, $productData)
     {
         $sql = "INSERT INTO favorites (user_id, product_id) VALUES ('$userId', '$productId')";

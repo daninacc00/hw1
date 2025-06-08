@@ -1,22 +1,13 @@
 loadCartItems();
 
 function loadCartItems() {
-    // Simuliamo una chiamata API al carrello
-    // In futuro, quando creerai l'API del carrello, sostituisci con:
-    // fetch("/api/shop/cart/getCart.php")
-    
-    // Per ora simuliamo la risposta basata sullo stato di login
-    simulateCartResponse()
+    fetch("/api/shop/cart/getCart.php")
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 renderCart(data.data);
             } else {
-                // Gestisci il caso di utente non autenticato
-                if (data.error_type === 'auth_required') {
-                    showAuthRequiredState(data.message, data.redirect_url);
-                } else {
-                    showError(data.message);
-                }
+                showAuthRequiredState(data.message);
             }
         })
         .catch(error => {
@@ -25,120 +16,34 @@ function loadCartItems() {
         });
 }
 
-// Funzione di simulazione - rimuovi quando crei l'API reale del carrello
-function simulateCartResponse() {
-    return new Promise((resolve) => {
-        // Controlla se l'utente è loggato verificando se ci sono counter nel header
-        const favCounter = document.getElementById('favorites-counter');
-        const cartCounter = document.getElementById('cart-counter');
-        
-        // Se i counter non esistono o sono nascosti, simula utente non loggato
-        if (!favCounter || !cartCounter || 
-            favCounter.style.display === 'none' || 
-            cartCounter.style.display === 'none') {
-            
-            resolve({
-                success: false,
-                message: "Devi essere loggato per accedere al tuo carrello",
-                error_type: 'auth_required',
-                redirect_url: '/pages/login/login.php',
-                data: []
-            });
-        } else {
-            // Simula carrello vuoto per utenti loggati
-            resolve({
-                success: true,
-                data: {
-                    items: [], // Array vuoto per ora
-                    total: 0,
-                    subtotal: 0,
-                    shipping: 0,
-                    tax: 0
-                }
-            });
-        }
-    });
-}
-
-function showAuthRequiredState(message, redirectUrl) {
+function showAuthRequiredState(message) {
     const cartContent = document.querySelector('.cart-content');
     cartContent.innerHTML = "";
 
     const authAlert = document.createElement("div");
-    authAlert.classList.add("auth-required-alert");
-    
-    const icon = document.createElement("div");
-    icon.style.cssText = `
-        font-size: 3rem;
-        margin-bottom: 20px;
-        color: #6c757d;
-    `;
-    icon.textContent = "🛒";
-    
+    authAlert.className = "auth-required-alert";
+
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-cart-shopping";
+
     const title = document.createElement("h2");
-    title.style.cssText = `
-        color: #111; 
-        font-size: 24px;
-        font-weight: 600;
-        margin-bottom: 12px;
-    `;
+    title.className = "auth-title";
     title.textContent = "Accedi per vedere il tuo carrello";
-    
+
     const description = document.createElement("p");
-    description.style.cssText = `
-        color: #6c757d; 
-        font-size: 16px;
-        margin-bottom: 30px;
-        line-height: 1.5;
-    `;
+    description.className = "auth-description";
     description.textContent = message || "Devi essere loggato per accedere al tuo carrello";
-    
+
     const loginBtn = document.createElement("a");
-    loginBtn.href = redirectUrl || "/pages/login/login.php";
-    loginBtn.className = "btn";
-    loginBtn.style.cssText = `
-        background: #000; 
-        color: white; 
-        padding: 12px 24px; 
-        text-decoration: none; 
-        border-radius: 24px; 
-        display: inline-block; 
-        margin-right: 16px;
-        font-weight: 500;
-        transition: background-color 0.3s ease;
-    `;
+    loginBtn.href = "/pages/login/login.php";
+    loginBtn.className = "btn btn-primary";
     loginBtn.textContent = "Accedi";
-    loginBtn.addEventListener('mouseover', () => {
-        loginBtn.style.background = '#333';
-    });
-    loginBtn.addEventListener('mouseout', () => {
-        loginBtn.style.background = '#000';
-    });
-    
+
     const shopBtn = document.createElement("a");
     shopBtn.href = "/pages/shop/shop.php";
-    shopBtn.className = "btn";
-    shopBtn.style.cssText = `
-        background: transparent; 
-        color: #000; 
-        padding: 12px 24px; 
-        text-decoration: none; 
-        border-radius: 24px; 
-        display: inline-block;
-        border: 1px solid #000;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    `;
+    shopBtn.className = "btn btn-secondary";
     shopBtn.textContent = "Continua a fare shopping";
-    shopBtn.addEventListener('mouseover', () => {
-        shopBtn.style.background = '#000';
-        shopBtn.style.color = 'white';
-    });
-    shopBtn.addEventListener('mouseout', () => {
-        shopBtn.style.background = 'transparent';
-        shopBtn.style.color = '#000';
-    });
-    
+
     authAlert.appendChild(icon);
     authAlert.appendChild(title);
     authAlert.appendChild(description);
@@ -162,7 +67,6 @@ function renderCart(cartData) {
         return;
     }
 
-    // Crea la struttura del carrello con prodotti
     const cartItems = document.createElement('div');
     cartItems.className = 'cart-items';
 
@@ -171,7 +75,7 @@ function renderCart(cartData) {
         cartItems.appendChild(cartItem);
     });
 
-    const cartSummary = createCartSummary(cartData);
+    const cartSummary = createCartSummary(cartData.summary);
 
     cartContent.appendChild(cartItems);
     cartContent.appendChild(cartSummary);
@@ -180,88 +84,166 @@ function renderCart(cartData) {
 function createCartItem(item) {
     const cartItem = document.createElement('div');
     cartItem.className = 'cart-item';
-    cartItem.dataset.itemId = item.id;
+    cartItem.dataset.itemId = item.cart_item_id;
 
-    cartItem.innerHTML = `
-        <img src="${item.image_url}" alt="${item.name}" class="item-image">
-        <div class="item-details">
-            <div class="item-name">${item.name}</div>
-            <div class="item-info">Colore: ${item.color_name}</div>
-            <div class="item-info">Taglia: EU ${item.size_value}</div>
-            <div class="item-price">€${item.price}</div>
-        </div>
-        <div class="item-actions">
-            <button class="remove-btn" onclick="removeFromCart('${item.id}')">Rimuovi</button>
-            <div class="quantity-controls">
-                <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
-                <span class="quantity-display">${item.quantity}</span>
-                <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
-            </div>
-        </div>
-    `;
+    const img = document.createElement('img');
+    img.src = item.product_image;
+    img.alt = item.product_name;
+    img.className = 'item-image';
+
+    const itemDetails = document.createElement('div');
+    itemDetails.className = 'item-details';
+
+    const itemName = document.createElement('div');
+    itemName.className = 'item-name';
+    itemName.textContent = item.product_name;
+
+    const colorInfo = document.createElement('div');
+    colorInfo.className = 'item-info';
+    colorInfo.textContent = `Colore: ${item.color_name}`;
+
+    const sizeInfo = document.createElement('div');
+    sizeInfo.className = 'item-info';
+    sizeInfo.textContent = `Taglia: EU ${item.size_value}`;
+
+    const itemPrice = document.createElement('div');
+    itemPrice.className = 'item-price';
+    itemPrice.textContent = formatPrice(item.price);
+
+    itemDetails.appendChild(itemName);
+    itemDetails.appendChild(colorInfo);
+    itemDetails.appendChild(sizeInfo);
+    itemDetails.appendChild(itemPrice);
+
+    const itemActions = document.createElement('div');
+    itemActions.className = 'item-actions';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.textContent = 'Rimuovi';
+    removeBtn.addEventListener('click', () => removeFromCart(item.cart_item_id));
+
+    const quantityControls = document.createElement('div');
+    quantityControls.className = 'quantity-controls';
+
+    const decreaseBtn = document.createElement('button');
+    decreaseBtn.className = 'quantity-btn';
+    decreaseBtn.textContent = '-';
+    decreaseBtn.addEventListener('click', () => updateQuantity(item.cart_item_id, item.quantity - 1));
+
+    const quantityDisplay = document.createElement('span');
+    quantityDisplay.className = 'quantity-display';
+    quantityDisplay.textContent = item.quantity;
+
+    const increaseBtn = document.createElement('button');
+    increaseBtn.className = 'quantity-btn';
+    increaseBtn.textContent = '+';
+    increaseBtn.addEventListener('click', () => updateQuantity(item.cart_item_id, item.quantity + 1));
+
+    quantityControls.appendChild(decreaseBtn);
+    quantityControls.appendChild(quantityDisplay);
+    quantityControls.appendChild(increaseBtn);
+
+    itemActions.appendChild(removeBtn);
+    itemActions.appendChild(quantityControls);
+
+    cartItem.appendChild(img);
+    cartItem.appendChild(itemDetails);
+    cartItem.appendChild(itemActions);
 
     return cartItem;
 }
 
-function createCartSummary(cartData) {
-    const summary = document.createElement('div');
-    summary.className = 'cart-summary';
+function createCartSummary(summary) {
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = 'cart-summary';
 
-    summary.innerHTML = `
-        <div class="summary-row">
-            <span>Subtotale</span>
-            <span>€${cartData.subtotal.toFixed(2)}</span>
-        </div>
-        <div class="summary-row">
-            <span>Spedizione</span>
-            <span>${cartData.shipping > 0 ? '€' + cartData.shipping.toFixed(2) : 'Gratuita'}</span>
-        </div>
-        <div class="summary-row">
-            <span>Tasse</span>
-            <span>€${cartData.tax.toFixed(2)}</span>
-        </div>
-        <div class="summary-row summary-total">
-            <span>Totale</span>
-            <span>€${cartData.total.toFixed(2)}</span>
-        </div>
-        <button class="checkout-btn" onclick="proceedToCheckout()">Procedi al checkout</button>
-    `;
+    const subtotalRow = document.createElement('div');
+    subtotalRow.className = 'summary-row';
+    const subtotalLabel = document.createElement('span');
+    subtotalLabel.textContent = 'Subtotale';
+    const subtotalValue = document.createElement('span');
+    subtotalValue.textContent = formatPrice(summary.subtotal);
+    subtotalRow.appendChild(subtotalLabel);
+    subtotalRow.appendChild(subtotalValue);
 
-    return summary;
+    const shippingRow = document.createElement('div');
+    shippingRow.className = 'summary-row';
+    const shippingLabel = document.createElement('span');
+    shippingLabel.textContent = 'Spedizione';
+    const shippingValue = document.createElement('span');
+    shippingValue.textContent = summary.shipping_cost > 0 ? formatPrice(summary.shipping_cost) : 'Gratuita';
+    shippingRow.appendChild(shippingLabel);
+    shippingRow.appendChild(shippingValue);
+
+    const totalRow = document.createElement('div');
+    totalRow.className = 'summary-row summary-total';
+    const totalLabel = document.createElement('span');
+    totalLabel.textContent = 'Totale';
+    const totalValue = document.createElement('span');
+    totalValue.textContent = formatPrice(summary.total);
+    totalRow.appendChild(totalLabel);
+    totalRow.appendChild(totalValue);
+
+    summaryDiv.appendChild(subtotalRow);
+    summaryDiv.appendChild(shippingRow);
+    summaryDiv.appendChild(totalRow);
+
+    return summaryDiv;
 }
 
-function removeFromCart(itemId) {
-    // Qui faresti una chiamata all'API per rimuovere l'item
-    console.log('Rimuovendo item:', itemId);
-    
-    // Per ora simula la rimozione
-    const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
-    if (itemElement) {
-        itemElement.style.opacity = '0.5';
-        setTimeout(() => {
-            loadCartItems(); // Ricarica il carrello
-        }, 500);
-    }
-    
-    showSuccessMessage('Prodotto rimosso dal carrello');
+function removeFromCart(cartItemId) {
+    fetch("/api/shop/cart/removeFromCart.php", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cart_item_id: cartItemId })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage('Prodotto rimosso dal carrello');
+                loadCartItems();
+            } else {
+                showErrorMessage(data.message || 'Errore nella rimozione del prodotto');
+            }
+        })
+        .catch(error => {
+            console.error('Errore:', error);
+            showErrorMessage('Errore nella rimozione del prodotto');
+        });
 }
 
-function updateQuantity(itemId, newQuantity) {
+function updateQuantity(cartItemId, newQuantity) {
     if (newQuantity < 1) {
-        removeFromCart(itemId);
+        removeFromCart(cartItemId);
         return;
     }
-    
-    // Qui faresti una chiamata all'API per aggiornare la quantità
-    console.log('Aggiornando quantità:', itemId, newQuantity);
-    
-    // Per ora simula l'aggiornamento
-    showSuccessMessage('Quantità aggiornata');
-}
 
-function proceedToCheckout() {
-    // Implementa la logica di checkout
-    alert('Checkout non ancora implementato');
+    fetch("/api/shop/cart/updateQuantity.php", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            cart_item_id: cartItemId,
+            quantity: newQuantity
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessMessage('Quantità aggiornata');
+                loadCartItems();
+            } else {
+                showErrorMessage(data.message || 'Errore nell\'aggiornamento della quantità');
+            }
+        })
+        .catch(error => {
+            console.error('Errore:', error);
+            showErrorMessage('Errore nell\'aggiornamento della quantità');
+        });
 }
 
 function showEmptyCart() {
@@ -269,55 +251,24 @@ function showEmptyCart() {
     cartContent.innerHTML = "";
 
     const emptyAlert = document.createElement("div");
-    emptyAlert.classList.add("cart-empty-alert");
-    
-    const icon = document.createElement("div");
-    icon.style.cssText = `
-        font-size: 3rem;
-        margin-bottom: 20px;
-        color: #6c757d;
-    `;
-    icon.textContent = "🛒";
-    
+    emptyAlert.className = "cart-empty-alert";
+
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-cart-shopping";
+
     const title = document.createElement("h2");
-    title.style.cssText = `
-        color: #111; 
-        font-size: 24px;
-        font-weight: 600;
-        margin-bottom: 12px;
-    `;
+    title.className = "empty-title";
     title.textContent = "Il tuo carrello è vuoto";
-    
+
     const description = document.createElement("p");
-    description.style.cssText = `
-        color: #6c757d; 
-        font-size: 16px;
-        margin-bottom: 30px;
-        line-height: 1.5;
-    `;
+    description.className = "empty-description";
     description.textContent = "I prodotti che aggiungi al carrello appariranno qui";
-    
+
     const shopBtn = document.createElement("a");
     shopBtn.href = "/pages/shop/shop.php";
-    shopBtn.className = "btn";
-    shopBtn.style.cssText = `
-        background: #000; 
-        color: white; 
-        padding: 12px 24px; 
-        text-decoration: none; 
-        border-radius: 24px; 
-        display: inline-block;
-        font-weight: 500;
-        transition: background-color 0.3s ease;
-    `;
+    shopBtn.className = "btn btn-primary";
     shopBtn.textContent = "Inizia a fare shopping";
-    shopBtn.addEventListener('mouseover', () => {
-        shopBtn.style.background = '#333';
-    });
-    shopBtn.addEventListener('mouseout', () => {
-        shopBtn.style.background = '#000';
-    });
-    
+
     emptyAlert.appendChild(icon);
     emptyAlert.appendChild(title);
     emptyAlert.appendChild(description);
@@ -327,12 +278,20 @@ function showEmptyCart() {
 
 function showError(message) {
     const cartContent = document.querySelector('.cart-content');
-    cartContent.innerHTML = `
-        <div style="text-align: center; padding: 60px 20px; color: #d32f2f;">
-            <h3>Errore</h3>
-            <p>${message}</p>
-        </div>
-    `;
+    cartContent.innerHTML = '';
+
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-state';
+
+    const errorTitle = document.createElement('h3');
+    errorTitle.textContent = 'Errore';
+
+    const errorMessage = document.createElement('p');
+    errorMessage.textContent = message;
+
+    errorDiv.appendChild(errorTitle);
+    errorDiv.appendChild(errorMessage);
+    cartContent.appendChild(errorDiv);
 }
 
 function showErrorMessage(message) {
@@ -344,7 +303,6 @@ function showSuccessMessage(message) {
 }
 
 function showMessage(message, type) {
-    // Rimuovi messaggi esistenti
     const existingMessages = document.querySelectorAll('.feedback-message');
     existingMessages.forEach(msg => msg.remove());
 
@@ -352,33 +310,16 @@ function showMessage(message, type) {
     messageElement.className = `feedback-message feedback-${type}`;
     messageElement.textContent = message;
 
-    // Stili per il messaggio
-    Object.assign(messageElement.style, {
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        padding: '12px 20px',
-        borderRadius: '4px',
-        color: 'white',
-        fontWeight: '500',
-        zIndex: '1000',
-        transform: 'translateX(100%)',
-        transition: 'transform 0.3s ease',
-        background: type === 'success' ? '#107C10' : '#d32f2f'
-    });
-
     document.body.appendChild(messageElement);
 
-    // Animazione di entrata
-    setTimeout(() => {
-        messageElement.style.transform = 'translateX(0)';
-    }, 100);
+    messageElement.offsetHeight;
+    messageElement.classList.add('show');
 
-    // Rimozione automatica dopo 3 secondi
-    setTimeout(() => {
-        messageElement.style.transform = 'translateX(100%)';
-        setTimeout(() => {
-            messageElement.remove();
-        }, 300);
-    }, 3000);
+    messageElement.addEventListener('click', () => {
+        messageElement.classList.remove('show');
+    });
+}
+
+function formatPrice(price) {
+    return '€' + price.toFixed(2).replace('.', ',');
 }

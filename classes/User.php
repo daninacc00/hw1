@@ -11,17 +11,12 @@ class User
         $this->conn = $conn;
     }
 
-    /**
-     * Registra un nuovo utente
-     */
     public function register($username, $email, $password, $nome, $cognome)
     {
-        // Verifica se username o email esistono già
         if ($this->isUserExist($username, $email)) {
             return ['success' => false, 'message' => 'Username o email già esistenti'];
         }
 
-        // Hash della password
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
         $username = mysqli_real_escape_string($this->conn, $username);
@@ -29,7 +24,6 @@ class User
         $nome = mysqli_real_escape_string($this->conn, $nome);
         $cognome = mysqli_real_escape_string($this->conn, $cognome);
 
-        // Inserimento nel database
         $sql = "INSERT INTO utenti (username, email, password_hash, nome, cognome) 
                 VALUES ('$username', '$email', '$passwordHash', '$nome', '$cognome')";
 
@@ -40,13 +34,9 @@ class User
         }
     }
 
-    /**
-     * Verifica login utente
-     */
     public function login($username, $password)
     {
         $username = mysqli_real_escape_string($this->conn, $username);
-        // Query sicura con due parametri distinti
         $sql = "SELECT * FROM utenti 
                 WHERE (username = '$username' OR email = '$username') 
                 AND stato_account = 0";
@@ -55,10 +45,8 @@ class User
 
         if ($utente = mysqli_fetch_assoc($result)) {
             if (password_verify($password, $utente['password_hash'])) {
-                // Aggiorna ultimo accesso
                 $this->updateLastLogin($utente['id_utente']);
 
-                // Rimuovi la password dall'array di ritorno
                 unset($utente['password_hash']);
 
                 return ['success' => true, 'utente' => $utente];
@@ -70,10 +58,6 @@ class User
         }
     }
 
-
-    /**
-     * Verifica se utente esiste già
-     */
     private function isUserExist($username, $email)
     {
         $username = mysqli_real_escape_string($this->conn, $username);
@@ -86,22 +70,16 @@ class User
         return $row['count'] > 0;
     }
 
-    /**
-     * Aggiorna ultimo accesso
-     */
     private function updateLastLogin($idUtente)
     {
-        $idUtente = (int)$idUtente; // Cast a intero per sicurezza
+        $idUtente = (int)$idUtente;
         $sql = "UPDATE utenti SET ultimo_accesso = CURRENT_TIMESTAMP WHERE id_utente = $idUtente";
         mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
     }
 
-    /**
-     * Ottieni utente per ID
-     */
     public function getUserById($id)
     {
-        $id = (int)$id; // Cast a intero per sicurezza
+        $id = (int)$id; 
         $sql = "SELECT * 
                 FROM utenti WHERE id_utente = $id";
 

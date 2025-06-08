@@ -17,7 +17,7 @@ class Slider
                 FROM slider_images
                 WHERE is_active = 1";
                 
-        $result = mysqli_query($this->conn, $sql);
+        $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));;
         $images = [];
         
         if ($result) {
@@ -42,7 +42,7 @@ class Slider
         } else {
             return [
                 'success' => false, 
-                'message' => 'Errore durante il recupero delle immagini dello slider: ' . mysqli_error($this->conn)
+                'message' => 'Errore durante il recupero delle immagini dello slider'
             ];
         }
     }

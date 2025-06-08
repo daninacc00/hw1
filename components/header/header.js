@@ -1,10 +1,7 @@
-// --------------- [SEARCH BAR]---------------------------
-
 function onOpenSearch(event) {
     const container = event.currentTarget;
     container.classList.add("search-open");
-
-    document.body.style.overflow = 'hidden';
+    document.body.classList.add('no-scroll');
     document.addEventListener("click", onCloseSearchOutside);
 }
 
@@ -12,8 +9,7 @@ function onCloseSearch(event) {
     event.stopPropagation();
     let container = document.querySelector("#search-bar-container");
     container.classList.remove("search-open");
-
-  document.body.style.overflow = 'auto';
+    document.body.classList.remove('no-scroll');
     document.removeEventListener("click", onCloseSearchOutside);
 }
 
@@ -29,7 +25,6 @@ searchBarContainer.addEventListener("click", onOpenSearch);
 
 let closeSearch = document.querySelector(".close-search-btn");
 closeSearch.addEventListener("click", onCloseSearch);
-
 
 function handleAction(action) {
     switch (action) {
@@ -52,77 +47,71 @@ document.querySelectorAll('.action-item').forEach(item => {
 let cartCount = 0;
 let favoritesCount = 0;
 
-// Funzione per creare e mostrare popup di notifica
 function showNotificationPopup(type, title, message, actions = []) {
-    // Rimuovi popup esistenti
     const existingPopup = document.querySelector('.notification-popup');
     if (existingPopup) {
         existingPopup.remove();
     }
 
-    // Crea nuovo popup
     const popup = document.createElement('div');
     popup.className = `notification-popup ${type}`;
 
-    popup.innerHTML = `
-                <div class="popup-header">
-                    <h3 class="popup-title">${title}</h3>
-                    <button class="popup-close" onclick="closeNotificationPopup(this)">&times;</button>
-                </div>
-                <p class="popup-message">${message}</p>
-                ${actions.length > 0 ? `
-                    <div class="popup-actions">
-                        ${actions.map(action => `
-                            <a href="${action.url}" class="popup-btn ${action.primary ? 'primary' : ''}">${action.text}</a>
-                        `).join('')}
-                    </div>
-                ` : ''}
-            `;
+    const popupHeader = document.createElement('div');
+    popupHeader.className = 'popup-header';
+
+    const popupTitle = document.createElement('h3');
+    popupTitle.className = 'popup-title';
+    popupTitle.textContent = title;
+
+    popupHeader.appendChild(popupTitle);
+
+    const popupMessage = document.createElement('p');
+    popupMessage.className = 'popup-message';
+    popupMessage.textContent = message;
+
+    popup.appendChild(popupHeader);
+    popup.appendChild(popupMessage);
+
+    if (actions.length > 0) {
+        const popupActions = document.createElement('div');
+        popupActions.className = 'popup-actions';
+
+        actions.forEach(action => {
+            const actionBtn = document.createElement('a');
+            actionBtn.href = action.url;
+            actionBtn.className = `popup-btn ${action.primary ? 'primary' : ''}`;
+            actionBtn.textContent = action.text;
+            popupActions.appendChild(actionBtn);
+        });
+
+        popup.appendChild(popupActions);
+    }
 
     document.body.appendChild(popup);
 
-    // Mostra popup con animazione
-    setTimeout(() => {
-        popup.classList.add('show');
-    }, 10);
-
-    // Auto-rimozione dopo 5 secondi
-    setTimeout(() => {
-        closeNotificationPopup(popup);
-    }, 5000);
+    popup.offsetHeight;
+    popup.classList.add('show');
 }
 
-// Funzione per chiudere popup
-function closeNotificationPopup(element) {
-    const popup = element.classList ? element : element.closest('.notification-popup');
-    popup.classList.remove('show');
-    setTimeout(() => {
-        if (popup.parentNode) {
-            popup.parentNode.removeChild(popup);
-        }
-    }, 300);
-}
 
-// Funzione per aggiornare contatore carrello
 function updateCartCounter(quantity) {
     cartCount += quantity;
     const counter = document.getElementById('cart-counter');
     if (cartCount > 0) {
         counter.textContent = cartCount;
-        counter.style.display = 'flex';
+        counter.classList.remove('hidden');
     } else {
-        counter.style.display = 'none';
+        counter.classList.add('hidden');
     }
 }
 
-// Funzione per aggiornare contatore preferiti
 function updateFavoritesCounter(quantity) {
     favoritesCount += quantity;
     const counter = document.getElementById('favorites-counter');
     if (favoritesCount > 0) {
         counter.textContent = favoritesCount;
-        counter.style.display = 'flex';
+        counter.classList.remove('hidden');
     } else {
-        counter.style.display = 'none';
+        counter.classList.add('hidden');
     }
 }

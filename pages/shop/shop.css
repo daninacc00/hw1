@@ -4,14 +4,6 @@
     padding: 48px;
 }
 
-#weather-banner {
-    display: none;
-    background-color: #f5f5f5;
-    color: #111111;
-    padding: 1rem;
-    text-align: center;
-}
-
 #product-btn {
     margin-left: 1rem;
     padding: 0.5rem 1rem;
@@ -72,8 +64,8 @@
     font-size: 14px;
 }
 
-.sort-btn img,
-.filter-title img {
+.sort-btn i,
+.filter-title i {
     width: 12px;
     height: 12px;
 }

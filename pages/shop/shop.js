@@ -1,5 +1,5 @@
 currentFilters = {
-  gender: [], // Default
+  gender: [],
   section: null,
   sport: [],
   colors: [],
@@ -21,11 +21,6 @@ isLoading = false;
 init();
 
 function init() {
-  setupEventListeners();
-  loadInitialData();
-}
-
-function setupEventListeners() {
   const sortBtn = document.querySelector('.sort-btn');
   if (sortBtn) {
     sortBtn.addEventListener('click', toggleSortMenu);
@@ -38,9 +33,10 @@ function setupEventListeners() {
 
   setupFilterSections();
 
-  window.addEventListener('scroll', () => handleScroll());
+  window.addEventListener('scroll', handleScroll);
 
   handleUrlParameters();
+  loadInitialData();
 }
 
 function setupFilterSections() {
@@ -72,11 +68,11 @@ function createGenderFilter() {
     { name: 'Unisex', slug: 2 },
   ];
 
-  const genderTitle = [...document.querySelectorAll('.filter-section')]
+  const genderTitle = document.querySelectorAll('.filter-section')
     .find(section => section.dataset.section === "gender");
 
   if (genderTitle) {
-    const section = genderTitle.closest('.filter-section');
+    const section = genderTitle.querySelector('.filter-section');
     const content = document.createElement('div');
     content.classList.add("filter-content");
     content.classList.add("gender-filter");
@@ -111,11 +107,11 @@ function createGenderFilter() {
 }
 
 function createPriceFilter() {
-  const priceTitle = [...document.querySelectorAll('.filter-section')]
+  const priceTitle = document.querySelectorAll('.filter-section')
     .find(section => section.dataset.section === "price");
 
   if (priceTitle) {
-    const section = priceTitle.closest('.filter-section');
+    const section = priceTitle.querySelector('.filter-section');
     const content = document.createElement('div');
     content.classList.add("filter-content");
     content.classList.add("price-filter");
@@ -152,11 +148,11 @@ function createPriceFilter() {
 
 function createSizeFilter() {
   const sizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
-  const sizeTitle = [...document.querySelectorAll('.filter-section')]
+  const sizeTitle = document.querySelectorAll('.filter-section')
     .find(section => section.dataset.section === "size");
 
   if (sizeTitle) {
-    const section = sizeTitle.closest('.filter-section');
+    const section = sizeTitle.querySelector('.filter-section');
     const content = document.createElement('div');
 
     content.classList.add("filter-content");
@@ -177,7 +173,6 @@ function createSizeFilter() {
     content.appendChild(sizeGrid);
     section.appendChild(content);
 
-    // Event listeners
     const sizeButtons = content.querySelectorAll('.size-btn');
     sizeButtons.forEach(btn => {
       btn.addEventListener('click', () => toggleSize(btn));
@@ -195,11 +190,11 @@ function createColorFilter() {
     { name: 'Grigio', hex: '#808080', slug: 'gray' }
   ];
 
-  const colorTitle = [...document.querySelectorAll('.filter-section')]
+  const colorTitle = document.querySelectorAll('.filter-section')
     .find(section => section.dataset.section === "color");
 
   if (colorTitle) {
-    const section = colorTitle.closest('.filter-section');
+    const section = colorTitle.querySelector('.filter-section');
     const content = document.createElement('div');
 
     content.classList.add("filter-content");
@@ -231,7 +226,6 @@ function createColorFilter() {
     content.appendChild(colorGrid);
     section.appendChild(content);
 
-    // Event listeners
     const colorButtons = content.querySelectorAll('.color-item');
     colorButtons.forEach(btn => {
       btn.addEventListener('click', () => toggleColor(btn));
@@ -245,11 +239,11 @@ function createDiscountFilter() {
     { name: "Bestseller", slug: "bestseller" },
     { name: "Nuovi arrivi", slug: "new-arrival" },
   ]
-  const discountTitle = [...document.querySelectorAll('.filter-section')]
+  const discountTitle = document.querySelectorAll('.filter-section')
     .find(section => section.dataset.section === "discount");
 
   if (discountTitle) {
-    const section = discountTitle.closest('.filter-section');
+    const section = discountTitle.querySelector('.filter-section');
     const content = document.createElement('div');
 
     content.classList.add("filter-content");
@@ -274,7 +268,6 @@ function createDiscountFilter() {
 
     section.appendChild(content);
 
-    // Event listeners
     const checkboxes = content.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
       checkbox.addEventListener('change', () => handleDiscountFilter(checkbox));
@@ -286,11 +279,11 @@ function createShoeHeightFilter() {
   const heights = ['low', 'mid', 'high'];
   const heightLabels = { low: 'Basse', mid: 'Medie', high: 'Alte' };
 
-  const heightTitle = [...document.querySelectorAll('.filter-section')]
+  const heightTitle = document.querySelectorAll('.filter-section')
     .find(section => section.dataset.section === "height");
 
   if (heightTitle) {
-    const section = heightTitle.closest('.filter-section');
+    const section = heightTitle.querySelector('.filter-section');
     const content = document.createElement('div');
 
     content.classList.add("filter-content");
@@ -320,7 +313,6 @@ function createShoeHeightFilter() {
     content.appendChild(heightOptions);
     section.appendChild(content);
 
-    // Event listeners
     const radios = content.querySelectorAll('input[type="radio"]');
     radios.forEach(radio => {
       radio.addEventListener('change', () => handleHeightFilter(radio));
@@ -382,11 +374,11 @@ function toggleColor(btn) {
 }
 
 function applyPriceFilter() {
-  const minPrice = document.getElementById('min-price')?.value;
-  const maxPrice = document.getElementById('max-price')?.value;
+  const minPrice = document.getElementById('min-price');
+  const maxPrice = document.getElementById('max-price');
 
-  currentFilters.min_price = minPrice ? parseFloat(minPrice) : null;
-  currentFilters.max_price = maxPrice ? parseFloat(maxPrice) : null;
+  currentFilters.min_price = minPrice ? parseFloat(minPrice.value) : null;
+  currentFilters.max_price = maxPrice ? parseFloat(maxPrice.value) : null;
 
   applyFilters();
 }
@@ -410,6 +402,12 @@ function toggleSortMenu() {
   }
 
   sortMenu.classList.toggle('open');
+}
+
+function handleClose(e) {
+  if (!e.target.querySelector('.sort-btn') && !e.target.querySelector('.sort-menu')) {
+    menu.classList.remove('open');
+  }
 }
 
 function createSortMenu() {
@@ -440,32 +438,31 @@ function createSortMenu() {
     option.addEventListener('click', () => changeSortOrder(option.dataset.sort));
   });
 
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.sort-btn') && !e.target.closest('.sort-menu')) {
-      menu.classList.remove('open');
-    }
-  });
+  document.addEventListener('click', handleClose);
+}
+
+function handleCloseMenu() {
+  const sortMenu = document.querySelector('.sort-menu');
+  if (sortMenu)
+    sortMenu.classList.remove("open");
 }
 
 function changeSortOrder(sortValue) {
   currentFilters.sort = sortValue;
   currentPage = 1;
   applyFilters();
-
-  // Close menu
-  document.querySelector('.sort-menu')?.classList.remove('open');
+  handleCloseMenu();
 }
 
-// Filter toggle
 function toggleFilters() {
   const filters = document.querySelector('.filters');
   const btn = document.querySelector('.filter-btn');
 
   filters.classList.toggle('hidden');
-  btn.textContent = filters.classList.contains('hidden') ? 'Mostra filtri' : 'Nascondi filtri';
+  const isHidden = filters.classList.contains('hidden')
+  btn.textContent =  isHidden ? 'Mostra filtri' : 'Nascondi filtri';
 }
 
-// Data loading
 function loadInitialData() {
   loadProducts();
 }
@@ -487,9 +484,6 @@ function loadProducts(append = false) {
           renderProducts(data.data.products);
           updateCategoryTitle();
         }
-
-        // totalProducts = data.data.pagination.total;
-        updatePaginationInfo(data.data.pagination);
       } else {
         showError(data.message);
       }
@@ -528,7 +522,11 @@ function renderProducts(products) {
   if (!grid) return;
 
   if (products.length === 0) {
-    grid.innerHTML = '<div class="no-products">Nessun prodotto trovato</div>';
+    const noProducts = document.createElement("div");
+    noProducts.classList.add("no-products");
+    noProducts.textContent = "Nessun prodotto trovato";
+
+    grid.appendChild(noProducts);
     return;
   }
 
@@ -559,7 +557,6 @@ function createProductCard(product) {
   productLink.style.textDecoration = 'none';
   productLink.style.color = 'inherit';
 
-  // Product image container
   const imageContainer = document.createElement('div');
   imageContainer.className = 'product-image';
 
@@ -568,9 +565,6 @@ function createProductCard(product) {
   img.alt = product.name;
   imageContainer.appendChild(img);
 
-  // card.appendChild(imageContainer);
-
-  // Product info
   const info = document.createElement('div');
   info.className = 'product-info';
 
@@ -657,13 +651,19 @@ function createProductCard(product) {
 }
 
 function renderStars(rating) {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
-  return '★'.repeat(fullStars) +
-    (hasHalfStar ? '☆' : '') +
-    '☆'.repeat(emptyStars);
+  let stars = '';
+  
+  for (let i = 1; i <= 5; i++) {
+    if (i <= rating) {
+      stars += '<i class="fa-solid fa-star"></i>';
+    } else if (i - 0.5 <= rating) {
+      stars += '<i class="fa-solid fa-star-half-alt"></i>';
+    } else {
+      stars += '<i class="fa-solid fa-star"></i>';
+    }
+  }
+  
+  return stars;
 }
 
 function applyFilters() {
@@ -673,7 +673,6 @@ function applyFilters() {
 }
 
 
-// Infinite scroll
 function handleScroll() {
   if (isLoading) return;
 
@@ -687,13 +686,17 @@ function handleScroll() {
   }
 }
 
-// UI Helpers
 function showLoading() {
   const grid = document.getElementById('product-grid');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = 'loading';
+  loadingDiv.textContent = 'Caricamento...';
+  
   if (currentPage === 1) {
-    grid.innerHTML = '<div class="loading">Caricamento...</div>';
+    grid.innerHTML = '';
+    grid.appendChild(loadingDiv);
   } else {
-    grid.insertAdjacentHTML('beforeend', '<div class="loading">Caricamento...</div>');
+    grid.appendChild(loadingDiv);
   }
 }
 
@@ -703,13 +706,16 @@ function hideLoading() {
 
 function showError(message) {
   const grid = document.getElementById('product-grid');
-  grid.innerHTML = `<div class="error">${message}</div>`;
+  const error = document.createElement("div");
+  error.classList.add("error");
+  error.textContent = message;
+
+  grid.appendChild(error);
 }
 
 function updateCategoryTitle() {
   const title = document.getElementById('categoryTitle');
   if (title) {
-    // Update based on current filters
     let newTitle = 'Sneakers e scarpe';
     if (currentFilters.gender === 'men') newTitle += ' da uomo';
     else if (currentFilters.gender === 'women') newTitle += ' da donna';
@@ -719,25 +725,16 @@ function updateCategoryTitle() {
   }
 }
 
-function updatePaginationInfo(pagination) {
-  // Update pagination info if needed
-  // console.log(`Showing ${pagination.current_page * pagination.per_page} of ${pagination.total} products`);
-}
-
-// URL management
 function handleUrlParameters() {
   const urlParams = new URLSearchParams(window.location.search);
 
-  // Apply URL parameters to filters
   if (urlParams.get('gender')) currentFilters.gender = urlParams.get('gender');
   if (urlParams.get('section')) currentFilters.section = urlParams.get('section');
   if (urlParams.get('sport')) currentFilters.sport = [urlParams.get('sport')];
-  // Add more URL parameter handling as needed
 }
 
 function updateUrl() {
   const params = new URLSearchParams();
-
   Object.entries(currentFilters).forEach(([key, value]) => {
     if (value !== null && value !== false && value !== '' &&
       (Array.isArray(value) ? value.length > 0 : true)) {
@@ -748,7 +745,6 @@ function updateUrl() {
       }
     }
   });
-
   const newUrl = `${window.location.pathname}?${params.toString()}`;
-  window.history.replaceState({}, '', newUrl);
+  window.location.href = newUrl;
 }

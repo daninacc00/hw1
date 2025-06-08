@@ -105,7 +105,6 @@ function renderProduct(product) {
     successMsg.className = 'success-message';
     successMsg.style.display = 'none';
 
-    // Componi product-info
     productInfo.appendChild(title);
     productInfo.appendChild(categoryDiv);
     productInfo.appendChild(renderRating(product));
@@ -119,19 +118,16 @@ function renderProduct(product) {
     productInfo.appendChild(renderDescription(product));
     productInfo.appendChild(renderAdditionalInfo(product));
 
-    // Aggiungi tutto al container
     container.appendChild(productImages);
     container.appendChild(productInfo);
     container.style.display = 'grid';
 
-    // Aggiorna il titolo della pagina
     document.title = product.name + ' - Nuovi arrivi';
     checkAddToCartButton();
 }
 
-// Funzioni di rendering dei componenti
 function renderThumbnails(images) {
-    const fragment = document.createDocumentFragment();
+    const thumbnails = document.createElement("div");
 
     if (!images || images.length === 0) return fragment;
 
@@ -145,15 +141,16 @@ function renderThumbnails(images) {
         img.alt = escapeHtml(image.alt_text || '');
 
         thumbDiv.appendChild(img);
-        fragment.appendChild(thumbDiv);
+        thumbnails.appendChild(thumbDiv);
     });
 
-    return fragment;
+    return thumbnails;
 }
 
 
 function renderRating(product) {
-    if (!product.rating || product.rating <= 0) return document.createDocumentFragment();
+    if (!product.rating || product.rating <= 0) 
+        return document.createElement("div");
 
     const container = document.createElement('div');
     container.className = 'rating';
@@ -161,12 +158,20 @@ function renderRating(product) {
     const starsDiv = document.createElement('div');
     starsDiv.className = 'stars';
 
-    const stars = Array.from({ length: 5 }, (_, i) =>
-        i < product.rating ? '★' : '☆'
-    ).join('');
-    starsDiv.textContent = stars;
+    for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('i');
+        if (i <= product.rating) {
+            star.className = 'fas fa-star'; 
+        } else if (i - 0.5 <= product.rating) {
+            star.className = 'fas fa-star-half-alt'; 
+        } else {
+            star.className = 'far fa-star';
+        }
+        starsDiv.appendChild(star);
+    }
 
     const ratingText = document.createElement('span');
+    ratingText.className = 'rating-text';
     ratingText.textContent = `${product.rating} (${product.rating_count || 0} recensioni)`;
 
     container.appendChild(starsDiv);
@@ -201,7 +206,8 @@ function renderPrice(product) {
 }
 
 function renderColors(colors) {
-    if (!colors || colors.length === 0) return document.createDocumentFragment();
+    if (!colors || colors.length === 0) 
+        return document.createElement('div');
 
     const wrapper = document.createElement('div');
     wrapper.className = 'colors';
@@ -218,7 +224,7 @@ function renderColors(colors) {
         div.style.backgroundColor = escapeHtml(color.hex_code);
         div.dataset.colorId = color.id;
         div.title = escapeHtml(color.name);
-        div.onclick = () => selectColor(div);
+        div.addEventListener("click", () => selectColor(div));
         options.appendChild(div);
     });
 
@@ -236,12 +242,10 @@ function renderSizes(sizes) {
     wrapper.className = 'sizes';
 
     const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    header.style.marginBottom = '15px';
+    header.className = 'sizes-header';
 
     const title = document.createElement('h3');
+    title.className = 'sizes-title';
     title.textContent = 'Seleziona la taglia/misura';
 
     const guide = document.createElement('a');
@@ -257,11 +261,14 @@ function renderSizes(sizes) {
 
     sizes.forEach(size => {
         const div = document.createElement('div');
-        div.className = 'size-option' + (size.stock_quantity == 0 ? ' out-of-stock' : '');
+        div.className = 'size-option';
+        if (size.stock_quantity == 0) {
+            div.classList.add('out-of-stock');
+        }
         div.dataset.sizeId = size.id;
         div.dataset.stock = size.stock_quantity;
         div.textContent = 'EU ' + escapeHtml(size.value);
-        div.onclick = () => selectSize(div);
+        div.addEventListener('click', () => selectSize(div));
         options.appendChild(div);
     });
 
@@ -292,22 +299,31 @@ function renderAdditionalInfo(product) {
 
     if (product.sport_name) {
         const sport = document.createElement('p');
-        sport.style.marginTop = '15px';
-        sport.innerHTML = `<strong>Categoria Sport:</strong> ${escapeHtml(product.sport_name)}`;
+        sport.className = 'info-item';
+        
+        const sportLabel = document.createElement('strong');
+        sportLabel.textContent = 'Categoria Sport: ';
+        
+        sport.appendChild(sportLabel);
+        sport.appendChild(document.createTextNode(escapeHtml(product.sport_name)));
         div.appendChild(sport);
     }
 
     if (product.shoe_height && shoeHeightLabels[product.shoe_height]) {
         const height = document.createElement('p');
-        height.style.marginTop = '10px';
-        height.innerHTML = `<strong>Altezza:</strong> ${shoeHeightLabels[product.shoe_height]}`;
+        height.className = 'info-item';
+        
+        const heightLabel = document.createElement('strong');
+        heightLabel.textContent = 'Altezza: ';
+        
+        height.appendChild(heightLabel);
+        height.appendChild(document.createTextNode(shoeHeightLabels[product.shoe_height]));
         div.appendChild(height);
     }
 
     return div;
 }
 
-// Funzioni di interazione
 function changeMainImage(imageUrl, thumbnailElement) {
     document.getElementById('main-product-image').src = imageUrl;
 
@@ -366,7 +382,6 @@ async function addToCart() {
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const originalText = addToCartBtn.textContent;
 
-    // Disabilita il pulsante e mostra loading
     addToCartBtn.disabled = true;
     addToCartBtn.textContent = 'Aggiungendo...';
 
@@ -400,7 +415,6 @@ async function addToCart() {
                 ]
             );
         } else {
-            // Gestisci errori di autenticazione
             if (result.error_type === 'auth_required') {
                 showNotificationPopup(
                     'error',
@@ -418,10 +432,9 @@ async function addToCart() {
         console.error('Errore nella richiesta:', error);
         showErrorMessage('Errore di connessione. Riprova più tardi.');
     } finally {
-        // Riabilita il pulsante
         addToCartBtn.disabled = false;
         addToCartBtn.textContent = originalText;
-        checkAddToCartButton(); // Ricontrolla lo stato del pulsante
+        checkAddToCartButton();
     }
 }
 
@@ -432,7 +445,6 @@ function updateFavoriteButton() {
     favBtn.removeEventListener('click', addFavorite);
     favBtn.removeEventListener('click', removeFavorite);
 
-    // Aggiorna il testo e la classe
     if (isFavorite) {
         favBtn.textContent = 'Rimuovi dai preferiti';
         favBtn.classList.add('in-favorites');
@@ -475,7 +487,6 @@ async function addFavorite() {
             );
             updateFavoritesCounter(1);
         } else {
-            // Gestisci errori di autenticazione
             if (result.error_type === 'auth_required') {
                 showNotificationPopup(
                     'error',
@@ -528,7 +539,6 @@ async function removeFavorite() {
                 'Il prodotto è stato rimosso dai tuoi preferiti.'
             );
         } else {
-            // Gestisci errori di autenticazione
             if (result.error_type === 'auth_required') {
                 showNotificationPopup(
                     'error',
@@ -553,7 +563,6 @@ async function removeFavorite() {
     }
 }
 
-// Funzioni di utilità
 function showLoading() {
     const loading = document.getElementById('loading');
     const productDetail = document.getElementById('product-detail');
@@ -589,8 +598,7 @@ function showErrorMessage(message) {
     if (errorDiv) {
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
-
-        // Nascondi automaticamente dopo 5 secondi
+        
         setTimeout(() => {
             hideErrorMessage();
         }, 5000);
@@ -603,10 +611,7 @@ function hideErrorMessage() {
 }
 
 function formatPrice(price) {
-    return new Intl.NumberFormat('it-IT', {
-        style: 'currency',
-        currency: 'EUR'
-    }).format(price);
+    return '€' + price.toFixed(2).replace('.', ',');
 }
 
 function escapeHtml(text) {

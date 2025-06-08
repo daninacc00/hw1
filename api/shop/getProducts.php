@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../includes/config.php';
 require_once __DIR__ . '/../../classes/Product.php';
-require_once __DIR__ . '/../../utils/shop/shop-utils.php';
+require_once __DIR__ . '/../../classes/helpers/ShopUtils.php';
 
 header('Content-Type: application/json');
 

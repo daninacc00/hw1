@@ -15,9 +15,6 @@ class Cart
         $this->product = $product;
     }
 
-    /**
-     * Aggiunge un prodotto al carrello con supporto per colore, taglia e quantità
-     */
     public function addProduct($userId, $productId, $colorId, $sizeId, $quantity = 1)
     {
 
@@ -47,9 +44,6 @@ class Cart
         }
     }
 
-    /**
-     * Restituisce il numero dei preferiti dell'utente
-     */
     public function getNumOfProductInCart($userId)
     {
         $userId = mysqli_real_escape_string($this->conn, $userId);
@@ -61,9 +55,6 @@ class Cart
         return $row["num_product"];
     }
 
-     /**
-     * Rimuove un prodotto dal carrello
-     */
     public function removeProduct($userId, $productId)
     {
         $userId = mysqli_real_escape_string($this->conn, $userId);
@@ -77,15 +68,7 @@ class Cart
         }
 
         $sql = "DELETE FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
-        $result = mysqli_query($this->conn, $sql);
-
-        if (!$result) {
-            return [
-                'success' => false,
-                'message' => 'Errore nella query: ' . mysqli_error($this->conn)
-            ];
-        }
-
+        $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
         $affectedRows = mysqli_affected_rows($this->conn);
 
         if ($affectedRows === 0) {
@@ -101,67 +84,43 @@ class Cart
         ];
     }
 
-    /**
- * Rimuove TUTTE le varianti di un prodotto dal carrello
- * (tutte le combinazioni colore/taglia dello stesso prodotto)
- */
     public function removeAllProductsById($userId, $productId)
-{
-    $userId = mysqli_real_escape_string($this->conn, $userId);
-    $productId = mysqli_real_escape_string($this->conn, $productId);
+    {
+        $userId = mysqli_real_escape_string($this->conn, $userId);
+        $productId = mysqli_real_escape_string($this->conn, $productId);
 
-    if (!$userId || !$productId) {
+        if (!$userId || !$productId) {
+            return [
+                'success' => false,
+                'message' => 'ID utente o prodotto non valido'
+            ];
+        }
+
+        $countSql = "SELECT COUNT(*) as count FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
+        $countResult = mysqli_query($this->conn, $countSql) or die("Errore: " . mysqli_error($this->conn));
+
+        $countRow = mysqli_fetch_assoc($countResult);
+        $deletedCount = $countRow['count'];
+
+        $sql = "DELETE FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
+        $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
+
+        $affectedRows = mysqli_affected_rows($this->conn);
+
+        if ($affectedRows === 0) {
+            return [
+                'success' => false,
+                'message' => 'Prodotto non trovato nel carrello'
+            ];
+        }
+
         return [
-            'success' => false,
-            'message' => 'ID utente o prodotto non valido'
+            'success' => true,
+            'message' => "Prodotto rimosso dal carrello",
+            'deleted_count' => $deletedCount
         ];
     }
 
-    // Prima contiamo quante righe verranno eliminate per aggiornare il counter
-    $countSql = "SELECT COUNT(*) as count FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
-    $countResult = mysqli_query($this->conn, $countSql);
-    
-    if (!$countResult) {
-        return [
-            'success' => false,
-            'message' => 'Errore nella query: ' . mysqli_error($this->conn)
-        ];
-    }
-    
-    $countRow = mysqli_fetch_assoc($countResult);
-    $deletedCount = $countRow['count'];
-
-    // Elimina tutte le varianti del prodotto
-    $sql = "DELETE FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
-    $result = mysqli_query($this->conn, $sql);
-
-    if (!$result) {
-        return [
-            'success' => false,
-            'message' => 'Errore nella query: ' . mysqli_error($this->conn)
-        ];
-    }
-
-    $affectedRows = mysqli_affected_rows($this->conn);
-
-    if ($affectedRows === 0) {
-        return [
-            'success' => false,
-            'message' => 'Prodotto non trovato nel carrello'
-        ];
-    }
-
-    return [
-        'success' => true,
-        'message' => "Prodotto rimosso dal carrello ($affectedRows varianti)",
-        'deleted_count' => $deletedCount
-    ];
-}
-
-
- /** 
-  * Ottiene il carrello completo dell'utente con dettagli prodotti
-     */
     public function getUserCart($userId)
     {
         if (!$userId) {
@@ -231,7 +190,6 @@ class Cart
             ];
         }
 
-        // Calcola spese di spedizione (gratis sopra i 50€)
         $shippingCost = $subtotal >= 50 ? 0 : 5.99;
         $total = $subtotal + $shippingCost;
 
@@ -251,9 +209,6 @@ class Cart
         ];
     }
 
-    /**
-     * Aggiorna la quantità di un elemento specifico nel carrello
-     */
     public function updateCartItemQuantity($userId, $cartItemId, $newQuantity)
     {
         $userId = mysqli_real_escape_string($this->conn, $userId);
@@ -267,12 +222,11 @@ class Cart
             ];
         }
 
-        // Verifica che l'elemento appartenga all'utente
         $checkSql = "SELECT c.product_id, c.size_id, c.quantity, ps.stock_quantity 
                     FROM cart c
                     LEFT JOIN product_sizes ps ON c.product_id = ps.product_id AND c.size_id = ps.size_id
                     WHERE c.id = '$cartItemId' AND c.user_id = '$userId'";
-        
+
         $checkResult = mysqli_query($this->conn, $checkSql) or die("Errore: " . mysqli_error($this->conn));
         $cartItem = mysqli_fetch_assoc($checkResult);
 
@@ -283,7 +237,6 @@ class Cart
             ];
         }
 
-        // Verifica disponibilità stock
         if ($newQuantity > $cartItem['stock_quantity']) {
             return [
                 'success' => false,
@@ -291,7 +244,6 @@ class Cart
             ];
         }
 
-        // Aggiorna quantità
         $updateSql = "UPDATE cart SET quantity = '$newQuantity', updated_at = NOW() WHERE id = '$cartItemId'";
         $result = mysqli_query($this->conn, $updateSql) or die("Errore: " . mysqli_error($this->conn));
 
@@ -312,9 +264,6 @@ class Cart
         ];
     }
 
-    /**
-     * Rimuove un elemento specifico dal carrello
-     */
     public function removeCartItem($userId, $cartItemId)
     {
         $userId = mysqli_real_escape_string($this->conn, $userId);
@@ -327,10 +276,9 @@ class Cart
             ];
         }
 
-        // Verifica che l'elemento appartenga all'utente
         $checkSql = "SELECT id FROM cart WHERE id = '$cartItemId' AND user_id = '$userId'";
         $checkResult = mysqli_query($this->conn, $checkSql) or die("Errore: " . mysqli_error($this->conn));
-        
+
         if (mysqli_num_rows($checkResult) === 0) {
             return [
                 'success' => false,
@@ -363,10 +311,6 @@ class Cart
         ];
     }
 
-
-    /**
-     * Cerca un elemento esistente nel carrello
-     */
     private function getExistingCartItem($userId, $productId, $sizeId, $colorId)
     {
         $sql = "SELECT id, quantity 
@@ -382,37 +326,6 @@ class Cart
         return $row ?? null;
     }
 
-    /**
-     * Aggiorna la quantità di un elemento esistente nel carrello
-     */
-    // private function updateCartItemQuantity($existingItem, $additionalQuantity, $sizeData, $productData)
-    // {
-    //     $newQuantity = $existingItem['quantity'] + $additionalQuantity;
-
-    //     if ($newQuantity > $sizeData['stock_quantity']) {
-    //         return [
-    //             'success' => false,
-    //             'message' => 'Quantità totale supera la disponibilità in magazzino'
-    //         ];
-    //     }
-
-    //     $sql = "UPDATE cart SET quantity = $newQuantity, updated_at = NOW() WHERE id = '" . $existingItem['id'] . "'";
-    //     $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
-
-    //     return [
-    //         'success' => true,
-    //         'message' => 'Quantità prodotto aggiornata nel carrello',
-    //         'data' => [
-    //             'product_name' => $productData['name'],
-    //             'size' => $sizeData['size_value'],
-    //             'quantity' => $newQuantity
-    //         ]
-    //     ];
-    // }
-
-    /**
-     * Inserisce un nuovo elemento nel carrello
-     */
     private function insertNewCartItem($userId, $productId, $colorId, $sizeId, $quantity, $sizeData, $productData)
     {
         $sql = "INSERT INTO cart (user_id, product_id, color_id, size_id, quantity) 

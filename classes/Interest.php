@@ -13,12 +13,6 @@ class Interest
         $this->userId = $userId;
     }
 
-    // Aggiunta metodo per accedere alla connessione
-    public function getConnection()
-    {
-        return $this->conn;
-    }
-
     public function toggleInterest($interestId)
     {
         $sql = "SELECT * FROM user_interests WHERE user_id = '$this->userId' AND interest_id = '$interestId'";

@@ -10,18 +10,10 @@ const nextButton = document.querySelector(".slider-controls .slider-btn.next");
 prevButton.innerHTML = "&#10094;";
 nextButton.innerHTML = "&#10095;";
 
-async function loadSliderImages() {
-    fetch('/api/slider-images.php')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = response.json();
-            return result;
-        })
+function loadSliderImages() {
+    fetch('/api/landing/getSliderImages.php')
+        .then(response => response.json())
         .then(result => {
-            console.log(result)
             if (!result.success) {
                 throw new Error(result.error || 'Errore nel caricamento dei dati');
             }
@@ -29,7 +21,10 @@ async function loadSliderImages() {
             sliderImages = result.data;
 
             if (sliderImages.length === 0) {
-                container.innerHTML = '<div class="no-data">Nessuna immagine disponibile</div>';
+                const noData = document.createElement("div");
+                noData.classList.add("no-data");
+                noData.textContent = 'Nessuna immagine disponibile';
+                container.appendChild(noData);
                 return;
             }
 
@@ -38,7 +33,10 @@ async function loadSliderImages() {
         })
         .catch(error => {
             console.error('Errore nel caricamento delle immagini:', error);
-            container.innerHTML = `<div class="error">Errore nel caricamento: ${error.message}</div>`;
+            const error = document.createElement("div");
+            error.classList.add("error");
+            noerrorData.textContent = `Errore nel caricamento: ${error.message}`;
+            container.appendChild(noerrorData);
         });
 }
 
@@ -96,7 +94,6 @@ function updateSlider() {
     const translateX = -(currentIndex * imageWidth);
     sliderTrack.style.transform = `translateX(${translateX}%)`;
 
-    // Gestione stato bottoni
     if (currentIndex === 0) {
         prevButton.classList.add("disabled");
     } else {
@@ -110,18 +107,21 @@ function updateSlider() {
     }
 }
 
-prevButton.addEventListener("click", () => {
+function handlePrev() {
     if (currentIndex > 0) {
         currentIndex -= step;
         updateSlider();
     }
-});
+}
 
-nextButton.addEventListener("click", () => {
+function handleNext() {
     if (currentIndex + step <= sliderImages.length - itemsPerPage) {
         currentIndex += step;
         updateSlider();
     }
-});
+}
+
+prevButton.addEventListener("click", handlePrev);
+nextButton.addEventListener("click", handleNext);
 
 loadSliderImages();
