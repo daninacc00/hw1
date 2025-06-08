@@ -85,17 +85,17 @@ class Favorites
      * Ottiene la lista dei prodotti preferiti di un utente
      */
     public function getUserFavorites($userId)
-{
-    if (!$userId) {
-        return [
-            'success' => false,
-            'message' => 'ID utente non valido'
-        ];
-    }
+    {
+        if (!$userId) {
+            return [
+                'success' => false,
+                'message' => 'ID utente non valido'
+            ];
+        }
 
-    $userId = mysqli_real_escape_string($this->conn, $userId);
+        $userId = mysqli_real_escape_string($this->conn, $userId);
 
-    $sql = "SELECT 
+        $sql = "SELECT 
             p.id, 
             p.name,
             s.display_name AS section_name,
@@ -112,21 +112,21 @@ class Favorites
         WHERE f.user_id = '$userId'
         ORDER BY f.created_at DESC";
 
-    $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
+        $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
 
-    $favorites = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        // Convertiamo il risultato della query in boolean
-        $row['isInCart'] = (bool)$row['isInCart'];
-        $favorites[] = $row;
+        $favorites = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            // Convertiamo il risultato della query in boolean
+            $row['isInCart'] = (bool)$row['isInCart'];
+            $favorites[] = $row;
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Preferiti recuperati con successo',
+            'data' => $favorites
+        ];
     }
-
-    return [
-        'success' => true,
-        'message' => 'Preferiti recuperati con successo',
-        'data' => $favorites
-    ];
-}
 
     /**
      * Verifica se un prodotto è nei preferiti dell'utente
@@ -151,9 +151,9 @@ class Favorites
      */
     public function isProductInUserFavorites($userId, $productId)
     {
-        if(!isset($userId))
+        if (!isset($userId))
             return false;
-        
+
         $userId = mysqli_real_escape_string($this->conn, $userId);
         $productId = mysqli_real_escape_string($this->conn, $productId);
 

@@ -18,7 +18,7 @@ $user = null;
 
 if (isLoggedIn() && $user_id) {
     try {
-        $user = $userManager->getUtenteById($user_id);
+        $user = $userManager->getUserById($user_id);
         $num_favorites = $favorites->getNumOfFavorites($user_id);
         $num_product_in_cart = $cart->getNumOfProductInCart($user_id);
     } catch (Exception $e) {
@@ -36,7 +36,7 @@ if (isLoggedIn() && $user_id) {
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="/components/header/header.css" />
     <script src="/components/header/header.js" defer></script>
 </head>

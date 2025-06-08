@@ -1,8 +1,15 @@
 let currentTab = "profile";
 
 function handleClickTab(e, link) {
-    e.preventDefault();
     const tabName = link.getAttribute('data-tab');
+    
+    if (tabName === 'favorites') {
+        window.location.href = '/pages/shop/favorites/favorites.php';
+        return;
+    }
+    
+    e.preventDefault();
+    console.log(tabName)
     switchTab(tabName);
 }
 
@@ -17,10 +24,11 @@ function switchTab(tabName) {
 
 function showTab(tabName) {
     const tabContent = document.getElementById(`tab-${tabName}`);
+    console.log("showTab: ", tabName)
     console.log("showTab: ", tabContent)
+
     if (tabContent) {
         tabContent.classList.add('active');
-        // Animazione fade-in opzionale
         tabContent.style.opacity = '0';
         setTimeout(() => {
             tabContent.style.opacity = '1';
@@ -38,12 +46,10 @@ function hideTab(tabName) {
 }
 
 function updateActiveLink(tabName) {
-    // Rimuovi active da tutti i link
     tabLinks.forEach(link => {
         link.classList.remove('active');
     });
 
-    // Aggiungi active al link corrente
     const activeLink = document.querySelector(`[data-tab="${tabName}"]`);
     if (activeLink) {
         activeLink.classList.add('active');

@@ -1,67 +1,30 @@
-<?php
-require_once __DIR__ . '/../../../includes/config.php';
-require_once __DIR__ . '/../../../includes/functions.php';
-require_once __DIR__ . '/../../../includes/auth.php';
-require_once __DIR__ . '/../../../classes/User.php';
-
-$userManager = new User();
-
-$user_id = $_SESSION['user_id'] ?? 1;
-
-$user = null;
-if (isLoggedIn()) {
-    $user = $userManager->getUtenteById($user_id);
-}
-
-function formatItalianDate($dateString)
-{
-    $mesi = [
-        1 => 'Gennaio',
-        2 => 'Febbraio',
-        3 => 'Marzo',
-        4 => 'Aprile',
-        5 => 'Maggio',
-        6 => 'Giugno',
-        7 => 'Luglio',
-        8 => 'Agosto',
-        9 => 'Settembre',
-        10 => 'Ottobre',
-        11 => 'Novembre',
-        12 => 'Dicembre'
-    ];
-
-    $date = new DateTime($dateString);
-    $mese = $mesi[(int)$date->format('n')];
-    $anno = $date->format('Y');
-
-    return "$mese $anno";
-}
-
-?>
-
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il mio Profilo - Nike</title>
-    <link rel="stylesheet" href="/pages/account/profile/profile.css" />
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="/assets/favicon.ico" />
+
+    <link rel="stylesheet" href="/css/global.css" />
+    <link rel="stylesheet" href="profile/profile.css" />
+    <script src="profile/profile.js" defer></script>
 </head>
 
-<body>
-    <div id="tab-profile" class="tab-content active">
-        <section class="profile-section">
-            <div class="profile-header">
-                <div class="profile-avatar"><?php echo $user["nome"][0] . $user["cognome"][0] ?></div>
-                <div class="profile-info">
-                    <h1><?php echo $user["nome"] . " " . $user["cognome"] ?></h1>
-                    <p>Member Nike da <?php
-                                        echo formatItalianDate($user["data_registrazione"]);
-                                        ?></p>
-                </div>
+<div id="tab-profile" class="tab-content active">
+    <section class="profile-section">
+        <div id="loading" class="loading-spinner">
+            <p>Caricamento profilo...</p>
+        </div>
+         <div id="error-message" class="error-message" style="display: none;">
+                <p>Errore nel caricamento del profilo. Riprova più tardi.</p>
             </div>
-        </section>
+        <div id="profile-content" class="profile-header" style="display: none;">
+            <div class="profile-avatar" id="profile-avatar"></div>
+            <div class="profile-info">
+                <h1 id="profile-name"></h1>
+                <p id="profile-member-since"></p>
+            </div>
+        </div>
+    </section>
 
-        <?php include 'interests/interests.php'; ?>
-    </div>
-
-</body>
+    <?php include 'profile/interests/interests.php'; ?>
+</div>

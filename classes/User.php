@@ -99,7 +99,7 @@ class User
     /**
      * Ottieni utente per ID
      */
-    public function getUtenteById($id)
+    public function getUserById($id)
     {
         $id = (int)$id; // Cast a intero per sicurezza
         $sql = "SELECT * 

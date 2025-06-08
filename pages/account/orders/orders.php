@@ -10,7 +10,7 @@ $user_id = $_SESSION['user_id'] ?? 1;
 
 $user = null;
 if (isLoggedIn()) {
-    $user = $userManager->getUtenteById($user_id);
+    $user = $userManager->getUserById($user_id);
 }
 
 function getUserOrders($user_id) {
@@ -30,6 +30,14 @@ function getUserOrders($user_id) {
             'status_class' => 'status-shipping',
             'product' => 'Felpa con cappuccio Nike Sportswear',
             'total' => '€79,99'
+        ],
+        [
+            'number' => '#NK2024003',
+            'date' => '25 Maggio 2024',
+            'status' => 'In preparazione',
+            'status_class' => 'status-preparing',
+            'product' => 'React Element 55 - Grigio/Blu',
+            'total' => '€99,99'
         ]
     ];
 }
@@ -44,37 +52,62 @@ function getUserOrders($user_id) {
 </head>
 
 <div id="tab-orders" class="tab-content">
-    <section class="orders-section">
-        <div class="section-header">
-            <h2>I miei Ordini</h2>
-            <p>Traccia i tuoi ordini e visualizza la cronologia degli acquisti</p>
+    <div class="container">
+        <h1 class="title">I miei Ordini</h1>
+        <p class="subtitle">Traccia i tuoi ordini e visualizza la cronologia degli acquisti</p>
+        
+        <div class="order-filters">
+            <button class="filter-btn active" data-filter="all">
+                <span class="status-indicator active"></span>
+                Tutti
+            </button>
+            <button class="filter-btn" data-filter="shipping">
+                <span class="status-indicator shipping"></span>
+                In corso
+            </button>
+            <button class="filter-btn" data-filter="delivered">
+                <span class="status-indicator delivered"></span>
+                Consegnati
+            </button>
+            <button class="filter-btn" data-filter="cancelled">
+                <span class="status-indicator cancelled"></span>
+                Annullati
+            </button>
         </div>
         
-        <div class="orders-content">
-            <div class="order-filters">
-                <button class="filter-btn active">Tutti</button>
-                <button class="filter-btn">In corso</button>
-                <button class="filter-btn">Consegnati</button>
-                <button class="filter-btn">Annullati</button>
-            </div>
-            
+        <div class="orders-grid">
             <?php
             $orders = getUserOrders($user_id);
-            foreach ($orders as $order): ?>
-                <div class="order-item">
-                    <div class="order-info">
-                        <div class="order-number"><?php echo htmlspecialchars($order['number']); ?></div>
-                        <div class="order-date">Ordinato il <?php echo htmlspecialchars($order['date']); ?></div>
-                        <div class="order-status <?php echo htmlspecialchars($order['status_class']); ?>">
-                            <?php echo htmlspecialchars($order['status']); ?>
+            if (empty($orders)): ?>
+                <div class="orders-empty-alert">
+                    <p>Non hai ancora effettuato nessun ordine</p>
+                    <a href="/products" class="btn-primary">Inizia a comprare</a>
+                </div>
+            <?php else:
+                foreach ($orders as $order): ?>
+                    <div class="order-card" data-status="<?php echo htmlspecialchars($order['status_class']); ?>">
+                        <div class="order-header">
+                            <div class="order-number"><?php echo htmlspecialchars($order['number']); ?></div>
+                            <div class="order-status <?php echo htmlspecialchars($order['status_class']); ?>">
+                                <span class="status-indicator <?php echo htmlspecialchars($order['status_class']); ?>"></span>
+                                <?php echo htmlspecialchars($order['status']); ?>
+                            </div>
+                        </div>
+                        
+                        <div class="order-content">
+                            <div class="order-product">
+                                <h3 class="product-name"><?php echo htmlspecialchars($order['product']); ?></h3>
+                                <p class="order-date">Ordinato il <?php echo htmlspecialchars($order['date']); ?></p>
+                            </div>
+                            
+                            <div class="order-footer">
+                                <div class="order-total"><?php echo htmlspecialchars($order['total']); ?></div>
+                                <button class="btn-details">Dettagli</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="order-details">
-                        <p><?php echo htmlspecialchars($order['product']); ?></p>
-                        <p class="order-total"><?php echo htmlspecialchars($order['total']); ?></p>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+                <?php endforeach;
+            endif; ?>
         </div>
-    </section>
+    </div>
 </div>
