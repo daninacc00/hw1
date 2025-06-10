@@ -1,7 +1,6 @@
 function validate() {
     let isValid = true;
-
-    // Validazione username
+    
     const username = document.getElementById('username');
     if (username.value.trim() === '') {
         showError(username, 'Username è obbligatorio');
@@ -9,8 +8,7 @@ function validate() {
     } else {
         removeError(username);
     }
-
-    // Validazione password
+    
     const password = document.getElementById('password');
     if (password.value === '') {
         showError(password, 'Password è obbligatoria');
@@ -18,10 +16,9 @@ function validate() {
     } else {
         removeError(password);
     }
-
+    
     return isValid;
 }
-
 
 function onResponse(data) {
     console.log(data);
@@ -34,32 +31,33 @@ function onResponse(data) {
 
 function onError(message) {
     console.error('Errore:', message);
-
+    
     const errorMessage = document.querySelector(".error-message");
     if (errorMessage) {
         errorMessage.innerHTML = "";
-
         errorMessage.classList.remove("hidden");
-
+        
         const messageText = document.createElement("span");
         messageText.textContent = message;
-
+        
         errorMessage.appendChild(messageText);
     }
-
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function handleLogin(e) {
     e.preventDefault();
-
+    
     if (!validate()) {
         return;
     }
-
-    const formData = new FormData(this);
-
-    fetch('/api/login.php', {
+    
+    const formData = new FormData();
+    formData.append('username', document.getElementById('username').value);
+    formData.append('password', document.getElementById('password').value);
+    
+    fetch('/api/auth/login.php', {
         method: 'POST',
         body: formData
     })

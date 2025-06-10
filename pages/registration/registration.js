@@ -1,26 +1,27 @@
 const passwordField = document.getElementById('password');
 const confirmField = document.getElementById('password_confirm');
+const registerForm = document.getElementById('registerForm');
+registerForm.addEventListener('submit', handleRegister);
 
 if (passwordField) {
     passwordField.addEventListener('input', function () {
-        validatePasswordStrength(this.value);
+        validatePasswordStrength(passwordField.value);
     });
 }
 
 if (confirmField && passwordField) {
     confirmField.addEventListener('input', function () {
-        if (this.value !== passwordField.value) {
-            showError(this, 'Le password non corrispondono');
+        if (confirmField.value !== passwordField.value) {
+            showError(confirmField, 'Le password non corrispondono');
         } else {
-            removeError(this);
+            removeError(confirmField);
         }
     });
 }
 
 function validate() {
     let isValid = true;
-
-    // Validazione username
+    
     const username = document.getElementById('username');
     if (username.value.trim() === '') {
         showError(username, 'Username è obbligatorio');
@@ -30,11 +31,8 @@ function validate() {
         isValid = false;
     } else {
         removeError(username);
-
-        //TODO: Verificare se l'username è già in uso (simulazione)
     }
-
-    // Validazione email
+    
     const email = document.getElementById('email');
     if (email.value.trim() === '') {
         showError(email, 'Email è obbligatoria');
@@ -45,8 +43,7 @@ function validate() {
     } else {
         removeError(email);
     }
-
-    // Validazione password
+    
     if (passwordField.value === '') {
         showError(passwordField, 'Password è obbligatoria');
         isValid = false;
@@ -56,8 +53,7 @@ function validate() {
     } else {
         removeError(passwordField);
     }
-
-    // Validazione conferma password
+    
     if (confirmField.value === '') {
         showError(confirmField, 'Conferma password è obbligatoria');
         isValid = false;
@@ -67,7 +63,7 @@ function validate() {
     } else {
         removeError(confirmField);
     }
-
+    
     return isValid;
 }
 
@@ -82,33 +78,37 @@ function onResponse(data) {
 
 function onError(message) {
     console.error('Errore:', message);
-
+    
     const errorMessage = document.querySelector(".error-message");
     if (errorMessage) {
         errorMessage.innerHTML = "";
-
         errorMessage.classList.remove("hidden");
-
+        
         const messageText = document.createElement("span");
         messageText.textContent = message;
-
+        
         errorMessage.appendChild(messageText);
     }
-
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 
 function handleRegister(e) {
     e.preventDefault();
     
-    if(!validate()){
+    if (!validate()) {
         return;
     }
-
-    const formData = new FormData(this);
-
-    fetch('/api/registration.php', {
+    
+    const formData = new FormData();
+    formData.append('username', document.getElementById('username').value);
+    formData.append('email', document.getElementById('email').value);
+    formData.append('nome', document.getElementById('nome').value);
+    formData.append('cognome', document.getElementById('cognome').value);
+    formData.append('password', document.getElementById('password').value);
+    formData.append('password_confirm', document.getElementById('password_confirm').value);
+    
+    fetch('/api/auth/registration.php', {
         method: 'POST',
         body: formData
     })
@@ -116,6 +116,3 @@ function handleRegister(e) {
         .then(onResponse)
         .catch(onError);
 }
-
-const registerForm = document.getElementById('registerForm');
-registerForm.addEventListener('submit', handleRegister);
