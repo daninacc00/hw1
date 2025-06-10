@@ -22,11 +22,10 @@ if (!isset($userId)) {
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
-$productId = $data['productId'] ?? null;
-$colorId = $data['colorId'] ?? null;
-$sizeId = $data['sizeId'] ?? null;
-$quantity = $data['quantity'] ?? null;
+$productId = $_POST['productId'] ?? null;
+$colorId = $_POST['colorId'] ?? null;
+$sizeId = $_POST['sizeId'] ?? null;
+$quantity = $_POST['quantity'] ?? null;
 
 if ($productId <= 0 || $sizeId <= 0 || $quantity <= 0 || $colorId <= 0) {
     echo json_encode(['success' => false, 'message' => "Dati mancanti o non validi"]);

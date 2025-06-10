@@ -16,9 +16,8 @@ if (!isset($userId)) {
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
-$cartItemId = $data['cartItemId'] ?? null;
-$quantity = $data['quantity'] ?? null;
+$cartItemId = $_POST['cartItemId'] ?? null;
+$quantity = $_POST['quantity'] ?? null;
 
 if (!isset($cartItemId) || !isset($quantity) || $quantity <= 0) {
     echo json_encode(['success' => false, 'message' => "Dati mancanti o non validi"]);

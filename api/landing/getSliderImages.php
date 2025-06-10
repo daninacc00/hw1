@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../includes/config.php';
-require_once __DIR__ . '/../classes/Slider.php';
+require_once __DIR__ . '/../../includes/config.php';
+require_once __DIR__ . '/../../classes/Slider.php';
 
 header('Content-Type: application/json');
 

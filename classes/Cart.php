@@ -38,7 +38,7 @@ class Cart
         $existingItem = $this->getExistingCartItem($userId, $productId, $sizeId, $colorId);
 
         if ($existingItem) {
-            return $this->updateCartItemQuantity($existingItem, $quantity, $sizeData['data'], $productData['data']);
+            return $this->updateCartItemQuantity($userId, $existingItem['id'], $quantity);
         } else {
             return $this->insertNewCartItem($userId, $productId, $colorId, $sizeId, $quantity, $sizeData['data'], $productData['data']);
         }
@@ -67,23 +67,33 @@ class Cart
             ];
         }
 
-        $sql = "DELETE FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
-        $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
-        $affectedRows = mysqli_affected_rows($this->conn);
+        $checkSql = "SELECT COUNT(*) as count FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
+        $checkResult = mysqli_query($this->conn, $checkSql) or die("Errore: " . mysqli_error($this->conn));
 
-        if ($affectedRows === 0) {
+        $checkRow = mysqli_fetch_assoc($checkResult);
+
+        if ($checkRow['count'] == 0) {
             return [
                 'success' => false,
                 'message' => 'Prodotto non trovato nel carrello'
             ];
         }
 
-        return [
-            'success' => true,
-            'message' => 'Prodotto rimosso dal carrello'
-        ];
-    }
+        $sql = "DELETE FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
+        $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
 
+        if ($result) {
+            return [
+                'success' => true,
+                'message' => 'Prodotto rimosso dal carrello'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Errore durante la rimozione del prodotto'
+            ];
+        }
+    }
     public function removeAllProductsById($userId, $productId)
     {
         $userId = mysqli_real_escape_string($this->conn, $userId);
@@ -102,23 +112,28 @@ class Cart
         $countRow = mysqli_fetch_assoc($countResult);
         $deletedCount = $countRow['count'];
 
-        $sql = "DELETE FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
-        $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
-
-        $affectedRows = mysqli_affected_rows($this->conn);
-
-        if ($affectedRows === 0) {
+        if ($deletedCount == 0) {
             return [
                 'success' => false,
                 'message' => 'Prodotto non trovato nel carrello'
             ];
         }
 
-        return [
-            'success' => true,
-            'message' => "Prodotto rimosso dal carrello",
-            'deleted_count' => $deletedCount
-        ];
+        $sql = "DELETE FROM cart WHERE user_id = '$userId' AND product_id = '$productId'";
+        $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
+
+        if ($result) {
+            return [
+                'success' => true,
+                'message' => "Prodotto rimosso dal carrello",
+                'deleted_count' => $deletedCount
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Errore durante la rimozione del prodotto'
+            ];
+        }
     }
 
     public function getUserCart($userId)
@@ -293,15 +308,6 @@ class Cart
             return [
                 'success' => false,
                 'message' => 'Errore nella query: ' . mysqli_error($this->conn)
-            ];
-        }
-
-        $affectedRows = mysqli_affected_rows($this->conn);
-
-        if ($affectedRows === 0) {
-            return [
-                'success' => false,
-                'message' => 'Elemento carrello non trovato'
             ];
         }
 

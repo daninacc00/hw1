@@ -31,6 +31,9 @@ function handleAction(action) {
         case 'profile':
             window.location.href = "/pages/account/account.php";
             break;
+        case 'favorites':
+            window.location.href = "/pages/shop/favorites/favorites.php";
+            break;
         case 'logout':
             window.location.href = "/pages/logout.php";
             break;
@@ -97,6 +100,7 @@ function showNotificationPopup(type, title, message, actions = []) {
 function updateCartCounter(quantity) {
     cartCount += quantity;
     const counter = document.getElementById('cart-counter');
+
     if (cartCount > 0) {
         counter.textContent = cartCount;
         counter.classList.remove('hidden');
@@ -108,6 +112,7 @@ function updateCartCounter(quantity) {
 function updateFavoritesCounter(quantity) {
     favoritesCount += quantity;
     const counter = document.getElementById('favorites-counter');
+
     if (favoritesCount > 0) {
         counter.textContent = favoritesCount;
         counter.classList.remove('hidden');

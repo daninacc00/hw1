@@ -11,8 +11,20 @@ const shoeHeightLabels = {
 };
 
 function getProductIdFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('id');
+    const search = window.location.search;
+    if (!search) return null;
+
+    const query = search.substring(1);
+    const pairs = query.split('&');
+
+    for (const pair of pairs) {
+        const [key, value] = pair.split('=');
+        if (key === 'id' && value) {
+            return decodeURIComponent(value);
+        }
+    }
+
+    return null;
 }
 
 loadProduct();
@@ -20,22 +32,17 @@ loadProduct();
 function loadProduct() {
     showLoading();
     hideError();
-
     productId = getProductIdFromUrl();
-
     fetch(`/api/shop/getProduct.php?id=${productId}`)
         .then(response => response.json())
         .then(result => {
             if (!result.success || !result.data) {
                 throw new Error(result.message || 'Prodotto non trovato');
             }
-
             productData = result.data;
             isFavorite = result.data.is_favorite;
-
             renderProduct(result.data);
             updateFavoriteButton();
-
             hideLoading();
         })
         .catch(error => {
@@ -134,11 +141,11 @@ function renderThumbnails(images) {
     images.forEach((image, index) => {
         const thumbDiv = document.createElement('div');
         thumbDiv.className = 'thumbnail' + (index === 0 ? ' active' : '');
-        thumbDiv.onclick = () => changeMainImage(image.image_url, thumbDiv);
+        thumbDiv.addEventListener("click", () => changeMainImage(image.image_url, thumbDiv));
 
         const img = document.createElement('img');
-        img.src = escapeHtml(image.image_url);
-        img.alt = escapeHtml(image.alt_text || '');
+        img.src = image.image_url;
+        img.alt = image.alt_text;
 
         thumbDiv.appendChild(img);
         thumbnails.appendChild(thumbDiv);
@@ -149,7 +156,7 @@ function renderThumbnails(images) {
 
 
 function renderRating(product) {
-    if (!product.rating || product.rating <= 0) 
+    if (!product.rating || product.rating <= 0)
         return document.createElement("div");
 
     const container = document.createElement('div');
@@ -161,9 +168,9 @@ function renderRating(product) {
     for (let i = 1; i <= 5; i++) {
         const star = document.createElement('i');
         if (i <= product.rating) {
-            star.className = 'fas fa-star'; 
+            star.className = 'fas fa-star';
         } else if (i - 0.5 <= product.rating) {
-            star.className = 'fas fa-star-half-alt'; 
+            star.className = 'fas fa-star-half-alt';
         } else {
             star.className = 'far fa-star';
         }
@@ -206,7 +213,7 @@ function renderPrice(product) {
 }
 
 function renderColors(colors) {
-    if (!colors || colors.length === 0) 
+    if (!colors || colors.length === 0)
         return document.createElement('div');
 
     const wrapper = document.createElement('div');
@@ -221,9 +228,9 @@ function renderColors(colors) {
     colors.forEach((color, index) => {
         const div = document.createElement('div');
         div.className = 'color-option' + (index === 0 ? ' selected' : '');
-        div.style.backgroundColor = escapeHtml(color.hex_code);
+        div.style.backgroundColor = color.hex_code;
         div.dataset.colorId = color.id;
-        div.title = escapeHtml(color.name);
+        div.title = color.name;
         div.addEventListener("click", () => selectColor(div));
         options.appendChild(div);
     });
@@ -267,7 +274,7 @@ function renderSizes(sizes) {
         }
         div.dataset.sizeId = size.id;
         div.dataset.stock = size.stock_quantity;
-        div.textContent = 'EU ' + escapeHtml(size.value);
+        div.textContent = 'EU ' + size.value;
         div.addEventListener('click', () => selectSize(div));
         options.appendChild(div);
     });
@@ -285,7 +292,7 @@ function renderDescription(product) {
     div.className = 'product-description';
 
     const p = document.createElement('p');
-    const text = escapeHtml(product.description).replace(/\n/g, '<br>');
+    const text = product.description;
     p.innerHTML = text;
 
     div.appendChild(p);
@@ -300,24 +307,30 @@ function renderAdditionalInfo(product) {
     if (product.sport_name) {
         const sport = document.createElement('p');
         sport.className = 'info-item';
-        
+
         const sportLabel = document.createElement('strong');
         sportLabel.textContent = 'Categoria Sport: ';
-        
+
+        const sportValue = document.createElement('span');
+        sportValue.textContent = product.sport_name;
+
         sport.appendChild(sportLabel);
-        sport.appendChild(document.createTextNode(escapeHtml(product.sport_name)));
+        sport.appendChild(sportValue);
         div.appendChild(sport);
     }
 
     if (product.shoe_height && shoeHeightLabels[product.shoe_height]) {
         const height = document.createElement('p');
         height.className = 'info-item';
-        
+
         const heightLabel = document.createElement('strong');
         heightLabel.textContent = 'Altezza: ';
-        
+
+        const heightValue = document.createElement('span');
+        heightValue.textContent = shoeHeightLabels[product.shoe_height];
+
         height.appendChild(heightLabel);
-        height.appendChild(document.createTextNode(shoeHeightLabels[product.shoe_height]));
+        height.appendChild(heightValue);
         div.appendChild(height);
     }
 
@@ -373,7 +386,7 @@ function checkAddToCartButton() {
     }
 }
 
-async function addToCart() {
+function addToCart() {
     if (!selectedSizeId) {
         showErrorMessage('Seleziona una taglia prima di aggiungere al carrello');
         return;
@@ -385,57 +398,46 @@ async function addToCart() {
     addToCartBtn.disabled = true;
     addToCartBtn.textContent = 'Aggiungendo...';
 
-    const data = {
-        productId: productId,
-        colorId: selectedColorId,
-        sizeId: selectedSizeId,
-        quantity: 1
-    };
+    const formData = new FormData();
+    formData.append('productId', productId);
+    formData.append('colorId', selectedColorId);
+    formData.append('sizeId', selectedSizeId);
+    formData.append('quantity', 1);
 
-    try {
-        const response = await fetch('/api/shop/cart/addToCart.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            updateCartCounter(data.quantity);
-            showNotificationPopup(
-                'success',
-                'Aggiunto al carrello',
-                'Il prodotto è stato aggiunto al tuo carrello.',
-                [
-                    { text: 'Continua shopping', url: '#', primary: false },
-                    { text: 'Vai al carrello', url: '/pages/shop/cart/cart.php', primary: true }
-                ]
-            );
-        } else {
-            if (result.error_type === 'auth_required') {
+    fetch('/api/shop/cart/addToCart.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                updateCartCounter(1);
                 showNotificationPopup(
-                    'error',
-                    'Accesso richiesto',
-                    result.message,
+                    'success',
+                    'Aggiunto al carrello',
+                    'Il prodotto è stato aggiunto al tuo carrello.',
                     [
-                        { text: 'Accedi', url: result.redirect_url, primary: true }
+                        { text: 'Continua shopping', url: '#', primary: false },
+                        { text: 'Vai al carrello', url: '/pages/shop/cart/cart.php', primary: true }
                     ]
                 );
             } else {
-                showErrorMessage(result.message || 'Errore durante l\'aggiunta al carrello');
+               if (result.error_type === 'auth_required') {
+                    window.location.href = "/pages/login/login.php"
+                } else {
+                    showErrorMessage(result.message || 'Errore durante l\'aggiunta al carrello');
+                }
             }
-        }
-    } catch (error) {
-        console.error('Errore nella richiesta:', error);
-        showErrorMessage('Errore di connessione. Riprova più tardi.');
-    } finally {
-        addToCartBtn.disabled = false;
-        addToCartBtn.textContent = originalText;
-        checkAddToCartButton();
-    }
+        })
+        .catch(error => {
+            console.error('Errore nella richiesta:', error);
+            showErrorMessage('Errore di connessione. Riprova più tardi.');
+        })
+        .finally(function () {
+            addToCartBtn.disabled = false;
+            addToCartBtn.textContent = originalText;
+            checkAddToCartButton();
+        });
 }
 
 function updateFavoriteButton() {
@@ -456,111 +458,97 @@ function updateFavoriteButton() {
     }
 }
 
-async function addFavorite() {
+function addFavorite() {
     const favBtn = document.getElementById('add-to-favorites-btn');
     const originalText = favBtn.textContent;
 
     favBtn.disabled = true;
     favBtn.textContent = 'Aggiungendo...';
 
-    try {
-        const response = await fetch('/api/shop/favorites/addToFavorites.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productId })
-        });
+    const formData = new FormData();
+    formData.append('productId', productId);
 
-        const result = await response.json();
-
-        if (result.success) {
-            isFavorite = true;
-            updateFavoriteButton();
-            showNotificationPopup(
-                'success',
-                'Aggiunto ai preferiti',
-                'Il prodotto è stato aggiunto ai tuoi preferiti.',
-                [
-                    { text: 'Vai ai preferiti', url: '/pages/shop/favorites/favorites.php', primary: true }
-                ]
-            );
-            updateFavoritesCounter(1);
-        } else {
-            if (result.error_type === 'auth_required') {
+    fetch('/api/shop/favorites/addToFavorites.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                isFavorite = true;
+                updateFavoriteButton();
                 showNotificationPopup(
-                    'error',
-                    'Accesso richiesto',
-                    result.message,
+                    'success',
+                    'Aggiunto ai preferiti',
+                    'Il prodotto è stato aggiunto ai tuoi preferiti.',
                     [
-                        { text: 'Accedi', url: result.redirect_url, primary: true }
+                        { text: 'Vai ai preferiti', url: '/pages/shop/favorites/favorites.php', primary: true }
                     ]
                 );
+                updateFavoritesCounter(1);
             } else {
-                showErrorMessage(result.message || 'Errore durante l\'aggiunta ai preferiti');
+                if (result.error_type === 'auth_required') {
+                    window.location.href = "/pages/login/login.php"
+                } else {
+                    showErrorMessage(result.message || 'Errore durante l\'aggiunta ai preferiti');
+                }
             }
-        }
-    } catch (error) {
-        console.error('Errore nella richiesta:', error);
-        showErrorMessage('Errore di connessione. Riprova più tardi.');
-    } finally {
-        favBtn.disabled = false;
-        if (!isFavorite) {
-            favBtn.textContent = originalText;
-        }
-    }
+        })
+        .catch(error => {
+            console.error('Errore nella richiesta:', error);
+            showErrorMessage('Errore di connessione. Riprova più tardi.');
+        })
+        .finally(function () {
+            favBtn.disabled = false;
+            if (!isFavorite) {
+                favBtn.textContent = originalText;
+            }
+        });
 }
 
-async function removeFavorite() {
+function removeFavorite() {
     const favBtn = document.getElementById('add-to-favorites-btn');
     const originalText = favBtn.textContent;
 
     favBtn.disabled = true;
     favBtn.textContent = 'Rimuovendo...';
 
-    try {
-        const response = await fetch('/api/shop/favorites/removeFromFavorites.php', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productId })
-        });
+    const formData = new FormData();
+    formData.append('productId', productId);
 
-        const result = await response.json();
-
-        if (result.success) {
-            isFavorite = false;
-            updateFavoriteButton();
-            updateFavoritesCounter(-1);
-            showNotificationPopup(
-                'success',
-                'Rimosso dai preferiti',
-                'Il prodotto è stato rimosso dai tuoi preferiti.'
-            );
-        } else {
-            if (result.error_type === 'auth_required') {
+    fetch('/api/shop/favorites/removeFromFavorites.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                isFavorite = false;
+                updateFavoriteButton();
+                updateFavoritesCounter(-1);
                 showNotificationPopup(
-                    'error',
-                    'Accesso richiesto',
-                    result.message,
-                    [
-                        { text: 'Accedi', url: result.redirect_url, primary: true }
-                    ]
+                    'success',
+                    'Rimosso dai preferiti',
+                    'Il prodotto è stato rimosso dai tuoi preferiti.'
                 );
             } else {
-                showErrorMessage(result.message || 'Errore durante la rimozione dai preferiti');
+                if (result.error_type === 'auth_required') {
+                    window.location.href = "/pages/login/login.php"
+                } else {
+                    showErrorMessage(result.message || 'Errore durante la rimozione dai preferiti');
+                }
             }
-        }
-    } catch (error) {
-        console.error('Errore nella richiesta:', error);
-        showErrorMessage('Errore di connessione. Riprova più tardi.');
-    } finally {
-        favBtn.disabled = false;
-        if (isFavorite) {
-            favBtn.textContent = originalText;
-        }
-    }
+        })
+        .catch(error => {
+            console.error('Errore nella richiesta:', error);
+            showErrorMessage('Errore di connessione. Riprova più tardi.');
+        })
+        .finally(function () {
+            favBtn.disabled = false;
+            if (isFavorite) {
+                favBtn.textContent = originalText;
+            }
+        });
 }
 
 function showLoading() {
@@ -598,8 +586,8 @@ function showErrorMessage(message) {
     if (errorDiv) {
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
-        
-        setTimeout(() => {
+
+        setTimeout(function () {
             hideErrorMessage();
         }, 5000);
     }
@@ -611,12 +599,10 @@ function hideErrorMessage() {
 }
 
 function formatPrice(price) {
-    return '€' + price.toFixed(2).replace('.', ',');
+    const number = parseFloat(price);
+
+    if (isNaN(number)) return "";
+
+    return '€' + number.toFixed(2).replace('.', ',');
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}

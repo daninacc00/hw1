@@ -21,9 +21,7 @@ if (!isset($userId)) {
     exit;
 }
 
-
-$data = json_decode(file_get_contents('php://input'), true);
-if (!isset($data['interestId']) || empty($data['interestId']) || $data['interestId'] <= 0) {
+if (!isset($_POST['interestId']) || empty($_POST['interestId']) || $_POST['interestId'] <= 0) {
     echo json_encode([
         'success' => false,
         'message' => 'ID interesse non valido o mancante',
@@ -33,7 +31,7 @@ if (!isset($data['interestId']) || empty($data['interestId']) || $data['interest
 
 $manager = new Interest($userId);
 
-$interestId = (int)$data['interestId'];
+$interestId = (int)$_POST['interestId'];
 $result = $manager->toggleInterest($interestId);
 echo json_encode($result);
 

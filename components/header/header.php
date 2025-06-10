@@ -92,9 +92,6 @@ if (isLoggedIn() && $user_id) {
                                         <li class="action-item" data-action="profile">
                                             <span class="action-text">Profilo</span>
                                         </li>
-                                        <li class="action-item" data-action="orders">
-                                            <span class="action-text">Ordini</span>
-                                        </li>
                                         <li class="action-item" data-action="favorites">
                                             <span class="action-text">Preferiti</span>
                                         </li>
@@ -137,16 +134,16 @@ if (isLoggedIn() && $user_id) {
                         <a class="menu-hover-trigger-link" href="/pages/shop/shop.php">Novità e in evidenza</a>
                     </li>
                     <li class="list-item">
-                        <a class="menu-hover-trigger-link" href="men-category.php">Uomo</a>
+                        <a class="menu-hover-trigger-link" href="/pages/shop/shop.php">Uomo</a>
                     </li>
                     <li class="list-item">
-                        <a class="menu-hover-trigger-link" href="women-category.php">Donna</a>
+                        <a class="menu-hover-trigger-link" href="/pages/shop/shop.php">Donna</a>
                     </li>
                     <li class="list-item">
-                        <a class="menu-hover-trigger-link" href="kids-category.php">Kids</a>
+                        <a class="menu-hover-trigger-link" href="/pages/shop/shop.php">Kids</a>
                     </li>
                     <li class="list-item">
-                        <a class="menu-hover-trigger-link" href="shop.php?section=outlet">Outlet</a>
+                        <a class="menu-hover-trigger-link" href="/pages/shop/shop.php">Outlet</a>
                     </li>
                 </ul>
             </nav>
@@ -195,9 +192,8 @@ if (isLoggedIn() && $user_id) {
                     <a href="/pages/shop/favorites/favorites.php" class="link-item favorites-link">
                         <img src="/assets/icons/hearth-icon.svg" alt="Preferiti">
                         <span
-                            class="counter-badge"
-                            id="favorites-counter"
-                            style="display: <?php echo (isLoggedIn() && $num_favorites > 0) ? "flex;" : "none;" ?>">
+                            class="counter-badge <?php echo (isLoggedIn() && $num_favorites > 0) ? "" : "hidden" ?>"
+                            id="favorites-counter">
                             <?php echo $num_favorites ?>
                         </span>
                     </a>
@@ -207,9 +203,8 @@ if (isLoggedIn() && $user_id) {
                     <a href="/pages/shop/cart/cart.php" class="link-item cart-link">
                         <img src="/assets/icons/cart-icon.svg" alt="Carrello">
                         <span
-                            class="counter-badge"
-                            id="cart-counter"
-                            style="display: <?php echo (isLoggedIn() && $num_product_in_cart > 0) ? "flex;" : "none;" ?>">
+                            class="counter-badge  <?php echo (isLoggedIn() && $num_product_in_cart > 0) ? "" : "hidden" ?>"
+                            id="cart-counter">
                             <?php echo $num_product_in_cart ?>
                         </span>
                     </a>

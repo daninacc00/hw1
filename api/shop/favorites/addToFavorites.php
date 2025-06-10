@@ -22,8 +22,7 @@ if (!isset($userId)) {
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
-$productId = $data['productId'] ?? null;
+$productId = $_POST['productId'] ?? null;
 
 if (!isset($productId)) {
     echo json_encode(['success' => false, 'message' => "ID prodotto mancante"]);

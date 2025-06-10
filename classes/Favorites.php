@@ -50,6 +50,18 @@ class Favorites
             ];
         }
 
+        $checkSql = "SELECT COUNT(*) as count FROM favorites WHERE user_id = '$userId' AND product_id = '$productId'";
+        $checkResult = mysqli_query($this->conn, $checkSql) or die("Errore: " . mysqli_error($this->conn));
+
+        $checkRow = mysqli_fetch_assoc($checkResult);
+
+        if ($checkRow['count'] == 0) {
+            return [
+                'success' => false,
+                'message' => 'Prodotto non trovato nei preferiti'
+            ];
+        }
+
         $sql = "DELETE FROM favorites WHERE user_id = '$userId' AND product_id = '$productId'";
         $result = mysqli_query($this->conn, $sql);
 
@@ -57,15 +69,6 @@ class Favorites
             return [
                 'success' => false,
                 'message' => 'Errore nella query: ' . mysqli_error($this->conn)
-            ];
-        }
-
-        $affectedRows = mysqli_affected_rows($this->conn);
-
-        if ($affectedRows === 0) {
-            return [
-                'success' => false,
-                'message' => 'Prodotto non trovato nei preferiti'
             ];
         }
 

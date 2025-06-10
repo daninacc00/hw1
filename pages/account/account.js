@@ -9,7 +9,6 @@ function handleClickTab(e, link) {
     }
     
     e.preventDefault();
-    console.log(tabName)
     switchTab(tabName);
 }
 
@@ -24,13 +23,11 @@ function switchTab(tabName) {
 
 function showTab(tabName) {
     const tabContent = document.getElementById(`tab-${tabName}`);
-    console.log("showTab: ", tabName)
-    console.log("showTab: ", tabContent)
 
     if (tabContent) {
         tabContent.classList.add('active');
         tabContent.style.opacity = '0';
-        setTimeout(() => {
+        setTimeout(function () {
             tabContent.style.opacity = '1';
         }, 50);
     }
@@ -39,7 +36,6 @@ function showTab(tabName) {
 function hideTab(tabName) {
     
     const tabContent = document.getElementById(`tab-${tabName}`);
-    console.log("hideTab: ", tabContent)
     if (tabContent) {
         tabContent.classList.remove('active');
     }

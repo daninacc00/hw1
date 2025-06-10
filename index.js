@@ -33,10 +33,10 @@ function loadSliderImages() {
         })
         .catch(error => {
             console.error('Errore nel caricamento delle immagini:', error);
-            const error = document.createElement("div");
-            error.classList.add("error");
-            noerrorData.textContent = `Errore nel caricamento: ${error.message}`;
-            container.appendChild(noerrorData);
+            const errorDiv = document.createElement("div");
+            errorDiv.classList.add("error");
+            errorDiv.textContent = `Errore nel caricamento: ${error.message}`;
+            container.appendChild(errorDiv);
         });
 }
 

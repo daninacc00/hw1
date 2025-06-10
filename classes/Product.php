@@ -16,178 +16,158 @@ class Product
     }
 
     public function getProducts($filters = [], $page = 1, $limit = 20)
-    {
-        $offset = ($page - 1) * $limit;
-
-        $query = "SELECT DISTINCT
-                p.id, p.name, p.slug, p.short_description, p.price, p.original_price,
-                p.discount_percentage, p.gender, p.shoe_height,
-                p.is_bestseller, p.is_new_arrival, p.is_on_sale,
-                p.rating, p.rating_count,
-                c.display_name as category_name,
-                s.display_name as section_name,
-                sp.display_name as sport_name,
-                pi.image_url as primary_image,
-                COUNT(DISTINCT pc.color_id) as color_count
-            FROM products p
-            LEFT JOIN categories c ON p.category_id = c.id
-            LEFT JOIN sections s ON p.section_id = s.id
-            LEFT JOIN sports sp ON p.sport_id = sp.id
-            LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = 1
-            LEFT JOIN product_colors pc ON p.id = pc.product_id";
-
-        $where = " WHERE p.status = 'active'";
-
-        if (!empty($filters['gender'])) {
-            $genders = "";
-            foreach ($filters['gender'] as $gender) {
-                if (is_numeric($gender)) {
-                    $genders .= intval($gender) . ",";
-                }
-            }
-            if ($genders != "") {
-                $genders = rtrim($genders, ",");
-                $where .= " AND p.gender IN (" . $genders . ")";
-            }
+{
+    $offset = ($page - 1) * $limit;
+    
+    $query = "SELECT DISTINCT
+            p.id, p.name, p.slug, p.short_description, p.price, p.original_price,
+            p.discount_percentage, p.gender, p.shoe_height,
+            p.is_bestseller, p.is_new_arrival, p.is_on_sale,
+            p.rating, p.rating_count,
+            c.display_name as category_name,
+            s.display_name as section_name,
+            sp.display_name as sport_name,
+            pi.image_url as primary_image,
+            COUNT(DISTINCT pc.color_id) as color_count
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN sections s ON p.section_id = s.id
+        LEFT JOIN sports sp ON p.sport_id = sp.id
+        LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = 1
+        LEFT JOIN product_colors pc ON p.id = pc.product_id";
+    
+    if (!empty($filters['colors'])) {
+        $query .= " INNER JOIN product_colors pc2 ON p.id = pc2.product_id
+                   INNER JOIN colors col ON pc2.color_id = col.id";
+    }
+    
+    if (!empty($filters['sizes'])) {
+        $query .= " INNER JOIN product_sizes ps ON p.id = ps.product_id
+                   INNER JOIN sizes sz ON ps.size_id = sz.id";
+    }
+    
+    $where = " WHERE p.status = 'active'";
+    
+    if (!empty($filters['gender'])) {
+        $genderList = implode(',', array_map('intval', (array)$filters['gender']));
+        $where .= " AND p.gender IN ($genderList)";
+    }
+    
+    if (!empty($filters['section'])) {
+        $section = mysqli_real_escape_string($this->conn, $filters['section']);
+        $where .= " AND s.slug = '$section'";
+    }
+    
+    if (!empty($filters['sport'])) {
+        $sportList = '';
+        foreach ((array)$filters['sport'] as $sport) {
+            $sport = mysqli_real_escape_string($this->conn, $sport);
+            $sportList .= "'$sport',";
         }
-
-        if (!empty($filters['section'])) {
-            $section = mysqli_real_escape_string($this->conn, $filters['section']);
-            $where .= " AND s.slug = '" . $section . "'";
+        $sportList = rtrim($sportList, ',');
+        $where .= " AND sp.slug IN ($sportList)";
+    }
+    
+    if (!empty($filters['colors'])) {
+        $colorList = '';
+        foreach ((array)$filters['colors'] as $color) {
+            $color = mysqli_real_escape_string($this->conn, $color);
+            $colorList .= "'$color',";
         }
-
-        if (!empty($filters['sport'])) {
-            $sports = "";
-            if (is_array($filters['sport'])) {
-                foreach ($filters['sport'] as $sport) {
-                    $sport = mysqli_real_escape_string($this->conn, $sport);
-                    $sports .= "'" . $sport . "',";
-                }
-            } else {
-                $sport = mysqli_real_escape_string($this->conn, $filters['sport']);
-                $sports = "'" . $sport . "',";
-            }
-            if ($sports != "") {
-                $sports = rtrim($sports, ",");
-                $where .= " AND sp.slug IN (" . $sports . ")";
-            }
+        $colorList = rtrim($colorList, ',');
+        $where .= " AND col.hex_code IN ($colorList)";
+    }
+    
+    if (!empty($filters['sizes'])) {
+        $sizeList = '';
+        foreach ((array)$filters['sizes'] as $size) {
+            $size = mysqli_real_escape_string($this->conn, $size);
+            $sizeList .= "'$size',";
         }
-
-        if (!empty($filters['colors'])) {
-            $query .= " INNER JOIN product_colors pc2 ON p.id = pc2.product_id";
-            $query .= " INNER JOIN colors col ON pc2.color_id = col.id";
-
-            $colors = "";
-            foreach ($filters['colors'] as $color) {
-                $color = mysqli_real_escape_string($this->conn, $color);
-                $colors .= "'" . $color . "',";
-            }
-            if ($colors != "") {
-                $colors = rtrim($colors, ",");
-                $where .= " AND col.slug IN (" . $colors . ")";
-            }
-        }
-
-        if (!empty($filters['sizes'])) {
-            $query .= " INNER JOIN product_sizes ps ON p.id = ps.product_id";
-            $query .= " INNER JOIN sizes sz ON ps.size_id = sz.id";
-
-            $sizes = "";
-            foreach ($filters['sizes'] as $size) {
-                $size = mysqli_real_escape_string($this->conn, $size);
-                $sizes .= "'" . $size . "',";
-            }
-            if ($sizes != "") {
-                $sizes = rtrim($sizes, ",");
-                $where .= " AND sz.value IN (" . $sizes . ")";
-                $where .= " AND ps.stock_quantity > 0";
-            }
-        }
-
-        if (!empty($filters['min_price'])) {
-            $min_price = floatval($filters['min_price']);
-            $where .= " AND p.price >= " . $min_price;
-        }
-
-        if (!empty($filters['max_price'])) {
-            $max_price = floatval($filters['max_price']);
-            $where .= " AND p.price <= " . $max_price;
-        }
-
-        if (!empty($filters['shoe_height'])) {
-            $height = mysqli_real_escape_string($this->conn, $filters['shoe_height']);
-            $where .= " AND p.shoe_height = '" . $height . "'";
-        }
-
-        if (!empty($filters['is_on_sale'])) {
-            $where .= " AND p.is_on_sale = 1";
-        }
-        if (!empty($filters['is_bestseller'])) {
-            $where .= " AND p.is_bestseller = 1";
-        }
-        if (!empty($filters['is_new_arrival'])) {
-            $where .= " AND p.is_new_arrival = 1";
-        }
-
-        $orderBy = " ORDER BY ";
-        $sort = isset($filters['sort']) ? $filters['sort'] : 'newest';
-
-        if ($sort == 'price_low') {
-            $orderBy .= "p.price ASC";
-        } else if ($sort == 'price_high') {
-            $orderBy .= "p.price DESC";
-        } else if ($sort == 'rating') {
-            $orderBy .= "p.rating DESC";
-        } else if ($sort == 'bestseller') {
-            $orderBy .= "p.is_bestseller DESC, p.rating DESC";
-        } else {
-            $orderBy .= "p.created_at DESC";
-        }
-
-        $query .= $where . " GROUP BY p.id" . $orderBy . " LIMIT " . $limit . " OFFSET " . $offset;
-
-        $result = mysqli_query($this->conn, $query) or die("Errore: " . mysqli_error($this->conn));;
-
-        $products = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $products[] = $row;
-        }
-
-        $countQuery = "SELECT COUNT(DISTINCT p.id) as total
+        $sizeList = rtrim($sizeList, ',');
+        $where .= " AND sz.value IN ($sizeList) AND ps.stock_quantity > 0";
+    }
+    
+    if (!empty($filters['min_price'])) {
+        $where .= " AND p.price >= " . (float)$filters['min_price'];
+    }
+    if (!empty($filters['max_price'])) {
+        $where .= " AND p.price <= " . (float)$filters['max_price'];
+    }
+    
+    if (!empty($filters['shoe_height'])) {
+        $height = mysqli_real_escape_string($this->conn, $filters['shoe_height']);
+        $where .= " AND p.shoe_height = '$height'";
+    }
+    
+    if (!empty($filters['is_on_sale'])) {
+        $where .= " AND p.is_on_sale = 1";
+    }
+    if (!empty($filters['is_bestseller'])) {
+        $where .= " AND p.is_bestseller = 1";
+    }
+    if (!empty($filters['is_new_arrival'])) {
+        $where .= " AND p.is_new_arrival = 1";
+    }
+    
+    $sort = $filters['sort'] ?? 'newest';
+    $orderBy = match($sort) {
+        'price_asc' => ' ORDER BY p.price ASC',
+        'price_desc' => ' ORDER BY p.price DESC',
+        'rating' => ' ORDER BY p.rating DESC',
+        'name_asc' => ' ORDER BY p.name ASC',
+        'name_desc' => ' ORDER BY p.name DESC',
+        default => ' ORDER BY p.created_at DESC'
+    };
+    
+    $finalQuery = $query . $where . " GROUP BY p.id" . $orderBy . " LIMIT $limit OFFSET $offset";
+    
+    $result = mysqli_query($this->conn, $finalQuery);
+    if (!$result) {
+        return ['error' => mysqli_error($this->conn)];
+    }
+    
+    $products = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $products[] = $row;
+    }
+    
+    $countQuery = "SELECT COUNT(DISTINCT p.id) as total
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN sections s ON p.section_id = s.id
         LEFT JOIN sports sp ON p.sport_id = sp.id
         LEFT JOIN product_colors pc ON p.id = pc.product_id";
-
-        if (!empty($filters['colors'])) {
-            $countQuery .= " INNER JOIN product_colors pc2 ON p.id = pc2.product_id";
-            $countQuery .= " INNER JOIN colors col ON pc2.color_id = col.id";
-        }
-        if (!empty($filters['sizes'])) {
-            $countQuery .= " INNER JOIN product_sizes ps ON p.id = ps.product_id";
-            $countQuery .= " INNER JOIN sizes sz ON ps.size_id = sz.id";
-        }
-
-        $countQuery .= $where;
-
-        $countResult = mysqli_query($this->conn, $countQuery) or die("Errore: " . mysqli_error($this->conn));;
-        $total = 0;
-        if ($countResult) {
-            $row = mysqli_fetch_assoc($countResult);
-            $total = $row['total'];
-        }
-
-        return [
-            'products' => $products,
-            'pagination' => [
-                'total' => $total,
-                'current_page' => $page,
-                'per_page' => $limit,
-                'total_pages' => ceil($total / $limit)
-            ]
-        ];
+    
+    if (!empty($filters['colors'])) {
+        $countQuery .= " INNER JOIN product_colors pc2 ON p.id = pc2.product_id
+                        INNER JOIN colors col ON pc2.color_id = col.id";
     }
+    
+    if (!empty($filters['sizes'])) {
+        $countQuery .= " INNER JOIN product_sizes ps ON p.id = ps.product_id
+                        INNER JOIN sizes sz ON ps.size_id = sz.id";
+    }
+    
+    $countQuery .= $where;
+    
+    $countResult = mysqli_query($this->conn, $countQuery);
+    $total = 0;
+    if ($countResult) {
+        $row = mysqli_fetch_assoc($countResult);
+        $total = isset($row['total']) ? (int)$row['total'] : 0;
+    }
+    
+    return [
+        'products' => $products,
+        'pagination' => [
+            'total' => $total,
+            'current_page' => $page,
+            'per_page' => $limit,
+            'total_pages' => ceil($total / $limit)
+        ]
+    ];
+}
 
     public function getProductById($productId, $userId)
     {

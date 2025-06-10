@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../../classes/Product.php';
 
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Metodo non consentito']);
     exit;
 }
@@ -16,8 +16,7 @@ if (!isset($userId)) {
     exit;
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
-$cartItemId = $data['cartItemId'] ?? null;
+$cartItemId = $_POST['cartItemId'] ?? null;
 
 if (!isset($cartItemId)) {
     echo json_encode(['success' => false, 'message' => "ID elemento carrello mancante"]);

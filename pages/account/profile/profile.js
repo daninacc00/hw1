@@ -9,12 +9,7 @@ function loadUserProfile() {
     errorElement.style.display = 'none';
     profileContent.style.display = 'none';
 
-    fetch('/api/account/profile/getUserById.php', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
+    fetch('/api/account/profile/getUserById.php')
         .then(result => result.json())
         .then(data => {
             if (!data.success) {
@@ -29,7 +24,7 @@ function loadUserProfile() {
             errorElement.style.display = 'block';
 
             if (error.message.includes('Accedi')) {
-                setTimeout(() => {
+                setTimeout(function () {
                     window.location.href = '/pages/login/login.php';
                 }, 2000);
             }

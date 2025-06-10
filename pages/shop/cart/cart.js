@@ -121,7 +121,7 @@ function createCartItem(item) {
     const removeBtn = document.createElement('button');
     removeBtn.className = 'remove-btn';
     removeBtn.textContent = 'Rimuovi';
-    removeBtn.addEventListener('click', () => removeFromCart(item.cart_item_id));
+    removeBtn.addEventListener('click', () => removeFromCart(item.product_id));
 
     const quantityControls = document.createElement('div');
     quantityControls.className = 'quantity-controls';
@@ -192,18 +192,19 @@ function createCartSummary(summary) {
     return summaryDiv;
 }
 
-function removeFromCart(cartItemId) {
+function removeFromCart(productId) {
+    const formData = new FormData();
+    formData.append('productId', productId);
+
     fetch("/api/shop/cart/removeFromCart.php", {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ cart_item_id: cartItemId })
+        body: formData
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 showSuccessMessage('Prodotto rimosso dal carrello');
+                updateCartCounter(-data.deleted_count)
                 loadCartItems();
             } else {
                 showErrorMessage(data.message || 'Errore nella rimozione del prodotto');
@@ -221,20 +222,19 @@ function updateQuantity(cartItemId, newQuantity) {
         return;
     }
 
+    const formData = new FormData();
+    formData.append('cartItemId', cartItemId);
+    formData.append('quantity', newQuantity);
+
     fetch("/api/shop/cart/updateQuantity.php", {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            cart_item_id: cartItemId,
-            quantity: newQuantity
-        })
+        body: formData
     })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 showSuccessMessage('Quantità aggiornata');
+                updateCartCounter(1)
                 loadCartItems();
             } else {
                 showErrorMessage(data.message || 'Errore nell\'aggiornamento della quantità');
@@ -315,7 +315,7 @@ function showMessage(message, type) {
     messageElement.offsetHeight;
     messageElement.classList.add('show');
 
-    messageElement.addEventListener('click', () => {
+    messageElement.addEventListener('click', function () {
         messageElement.classList.remove('show');
     });
 }

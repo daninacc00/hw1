@@ -76,16 +76,12 @@ function fetchUserInterests(category, callback) {
 }
 
 function toggleInterest(interestId, callback) {
-    const body = {
-        interestId: interestId
-    };
-
+    const formData = new FormData();
+    formData.append('interestId', interestId);
+    
     fetch('/api/account/profile/interests/toggleInterest.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body)
+        body: formData
     })
         .then(result => result.json())
         .then(data => {
@@ -159,16 +155,13 @@ function renderInterestsGrid(userInterests) {
         return;
     }
 
-    userInterests.forEach(interest => {
+    userInterests.forEach(function(interest) {
         const card = document.createElement('div');
         card.className = `interest-card ${interest.user_has_interest ? 'selected' : ''}`;
         card.dataset.interestId = interest.id;
         
         const imageUrl = interest.image_url || `/assets/images/interests/${interest.id}.jpg`;
         card.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url('${imageUrl}')`;
-        card.style.backgroundSize = 'cover';
-        card.style.backgroundPosition = 'center';
-        card.style.backgroundRepeat = 'no-repeat';
         
         const categoryLabel = document.createElement('div');
         categoryLabel.className = 'category-label';
@@ -355,18 +348,27 @@ function setLoading(loading) {
     document.getElementById('loading').style.display = loading ? 'block' : 'none';
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function initializeApp() {
+function init() {
     setLoading(true);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const activeCategory = urlParams.get('category') || 'all';
+    function getUrlParam(name) {
+        const search = window.location.search;
+        if (!search) return null;
+        
+        const query = search.substring(1);
+        const pairs = query.split('&');
+        
+        for (const pair of pairs) {
+            const [key, value] = pair.split('=');
+            if (key === name && value) {
+                return decodeURIComponent(value);
+            }
+        }
+        
+        return null;
+    }
+
+    const activeCategory = getUrlParam('category') || 'all';
     appState.activeCategory = activeCategory;
 
     let categoriesLoaded = false;
@@ -375,10 +377,6 @@ function initializeApp() {
 
     function checkAllLoaded() {
         if (categoriesLoaded && interestsLoaded && userInterestsLoaded) {
-            console.log("categories: ", appState.categories);
-            console.log("interests: ", appState.interests);
-            console.log("userInterests: ", appState.userInterests);
-
             renderCategoryTabs(appState.categories, activeCategory);
             renderInterestsGrid(appState.userInterests);
             renderModalCategoryTabs(appState.categories, appState.userInterests);
@@ -407,7 +405,7 @@ function initializeApp() {
     });
 }
 
-initializeApp();
+init();
 
 document.getElementById('modal-close').addEventListener('click', closeInterestModal);
 document.getElementById('modal-cancel').addEventListener('click', closeInterestModal);

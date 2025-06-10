@@ -56,7 +56,7 @@ function createProductCard(product) {
 
     const heartButton = document.createElement('button');
     heartButton.className = 'heart-icon';
-    heartButton.addEventListener('click', (e) => {
+    heartButton.addEventListener('click', function (e) {
         e.preventDefault();
         handleRemoveFromFavorites(product.id, card);
     });
@@ -96,7 +96,7 @@ function createProductCard(product) {
 
     const cartButton = document.createElement('button');
     cartButton.className = `product-status ${product.isInCart ? 'status-added' : 'status-add-to-cart'}`;
-    cartButton.addEventListener('click', (e) => {
+    cartButton.addEventListener('click', function (e) {
         e.preventDefault();
         handleCartToggle(product.id, cartButton, product.isInCart);
     });
@@ -117,7 +117,7 @@ function createProductCard(product) {
     info.appendChild(price);
 
     infoContainer.appendChild(info);
-    infoContainer.appendChild(cartButton);ò
+    infoContainer.appendChild(cartButton);
 
     card.appendChild(imageContainer);
     card.appendChild(infoContainer);
@@ -125,17 +125,14 @@ function createProductCard(product) {
     return card;
 }
 
+
 function handleRemoveFromFavorites(productId, cardElement) {
-    const data = {
-        productId: productId
-    };
+    const formData = new FormData();
+    formData.append('productId', productId);
 
     fetch("/api/shop/favorites/removeFromFavorites.php", {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
+        method: 'POST',
+        body: formData
     })
         .then(response => response.json())
         .then(result => {
@@ -172,12 +169,12 @@ function handleRemoveFromCart(productId, buttonElement) {
 
     buttonElement.textContent = 'Rimuovendo...';
 
+    const formData = new FormData();
+    formData.append('productId', productId);
+
     fetch("/api/shop/cart/removeFromCart.php", {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId: productId })
+        method: 'POST',
+        body: formData
     })
         .then(response => response.json())
         .then(result => {
@@ -187,16 +184,16 @@ function handleRemoveFromCart(productId, buttonElement) {
 
                 updateCartCounter(result.deleted_count);
                 showSuccessMessage('Prodotto rimosso dal carrello');
-                
+
                 loadFavoriteProducts();
             } else {
                 if (result.error_type === 'auth_required') {
                     showAuthRequiredState(result.message, result.redirect_url);
                 } else {
                     showErrorMessage(result.message || 'Errore durante la rimozione dal carrello');
-                buttonElement.innerHTML = originalText;
+                    buttonElement.innerHTML = originalText;
                 }
-                
+
             }
         })
         .catch(error => {
@@ -204,7 +201,7 @@ function handleRemoveFromCart(productId, buttonElement) {
             showErrorMessage('Errore nella rimozione del prodotto. Riprova.');
             buttonElement.innerHTML = originalText;
         })
-        .finally(() => {
+        .finally(function () {
             buttonElement.disabled = false;
             buttonElement.style.opacity = '1';
         });
@@ -223,20 +220,23 @@ function showAddToCartModal(productId, buttonElement) {
 
     const header = document.createElement('div');
     header.className = 'cart-modal-header';
-    
+
     const title = document.createElement('h3');
     title.textContent = 'Seleziona opzioni';
-    
+
     const closeBtn = document.createElement('button');
     closeBtn.className = 'cart-modal-close';
-    closeBtn.textContent = '×';
-    
+
+    const closeIcon = document.createElement('i');
+    closeIcon.className = "fa-solid fa-xmark";
+    closeBtn.appendChild(closeIcon);
+
     header.appendChild(title);
     header.appendChild(closeBtn);
 
     const body = document.createElement('div');
     body.className = 'cart-modal-body';
-    
+
     const loading = document.createElement('div');
     loading.className = 'loading';
     loading.textContent = 'Caricamento opzioni...';
@@ -248,7 +248,7 @@ function showAddToCartModal(productId, buttonElement) {
     document.body.appendChild(modal);
 
     closeBtn.addEventListener('click', () => document.body.removeChild(modal));
-    modal.addEventListener('click', (e) => {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) document.body.removeChild(modal);
     });
 
@@ -306,14 +306,11 @@ function renderCartModal(product, modal, buttonElement) {
             colorOption.dataset.colorId = color.id;
             colorOption.title = color.name;
             colorOption.style.backgroundColor = color.hex_code;
-            colorOption.style.border = `2px solid ${index === 0 ? '#000' : '#ddd'}`;
 
-            colorOption.addEventListener('click', () => {
+            colorOption.addEventListener('click', function () {
                 colorOptions.querySelectorAll('.color-option').forEach(el => {
-                    el.style.border = '2px solid #ddd';
                     el.classList.remove('selected');
                 });
-                colorOption.style.border = '2px solid #000';
                 colorOption.classList.add('selected');
                 selectedColorId = colorOption.dataset.colorId;
             });
@@ -343,14 +340,14 @@ function renderCartModal(product, modal, buttonElement) {
             sizeOption.disabled = size.stock_quantity <= 0;
             sizeOption.textContent = `EU ${size.value} ${size.stock_quantity <= 0 ? '(Esaurito)' : ''}`;
 
-            sizeOption.addEventListener('click', () => {
+            sizeOption.addEventListener('click', function () {
                 if (!sizeOption.disabled) {
                     sizeOptions.querySelectorAll('.size-option').forEach(el => {
                         el.classList.remove('selected');
                     });
                     sizeOption.classList.add('selected');
                     selectedSizeId = sizeOption.dataset.sizeId;
-                    
+
                     addBtn.disabled = false;
                     addBtn.textContent = 'Aggiungi al carrello';
                 }
@@ -369,7 +366,7 @@ function renderCartModal(product, modal, buttonElement) {
     addBtn.disabled = true;
     addBtn.textContent = 'Seleziona una taglia';
 
-    addBtn.addEventListener('click', () => {
+    addBtn.addEventListener('click', function () {
         if (selectedSizeId) {
             addToCartWithOptions(product.id, selectedColorId, selectedSizeId, buttonElement, modal);
         }
@@ -385,39 +382,33 @@ function addToCartWithOptions(productId, colorId, sizeId, buttonElement, modal) 
     addBtn.textContent = 'Aggiungendo...';
     addBtn.classList.add('loading');
 
-    const data = {
-        productId: productId,
-        colorId: colorId,
-        sizeId: sizeId,
-        quantity: 1
-    };
+    const formData = new FormData();
+    formData.append('productId', productId);
+    formData.append('colorId', colorId);
+    formData.append('sizeId', sizeId);
+    formData.append('quantity', 1);
 
     fetch("/api/shop/cart/addToCart.php", {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
+        body: formData
     })
         .then(response => response.json())
         .then(result => {
             if (result.success) {
                 buttonElement.className = 'product-status status-added';
-                
+
                 const statusIndicator = document.createElement('span');
                 statusIndicator.className = 'status-indicator';
-                
+
                 buttonElement.innerHTML = '';
                 buttonElement.appendChild(statusIndicator);
                 buttonElement.appendChild(document.createTextNode('Aggiunto'));
-                
+
                 updateCartCounter(1);
                 showSuccessMessage('Prodotto aggiunto al carrello');
                 document.body.removeChild(modal);
-                
-                setTimeout(() => {
-                    loadFavoriteProducts();
-                }, 500);
+
+                loadFavoriteProducts();
             } else {
                 showErrorMessage(result.message || 'Errore durante l\'aggiunta al carrello');
                 addBtn.disabled = false;
@@ -437,18 +428,18 @@ function addToCartWithOptions(productId, colorId, sizeId, buttonElement, modal) 
 function showEmptyState() {
     const productsGrid = document.querySelector('.products-grid');
     productsGrid.innerHTML = "";
-    
+
     const emptyAlert = document.createElement("div");
     emptyAlert.classList.add("favorites-empty-alert");
-    
+
     const emptyText = document.createElement("p");
     emptyText.textContent = "Gli articoli aggiunti ai preferiti saranno salvati qui";
-    
+
     const shopBtn = document.createElement("a");
     shopBtn.href = "/pages/shop/shop.php";
     shopBtn.className = "btn btn-primary";
     shopBtn.textContent = "Inizia a fare shopping";
-    
+
     emptyAlert.appendChild(emptyText);
     emptyAlert.appendChild(shopBtn);
     productsGrid.appendChild(emptyAlert);
@@ -457,26 +448,26 @@ function showEmptyState() {
 function showAuthRequiredState(message, redirectUrl) {
     const productsGrid = document.querySelector('.products-grid');
     productsGrid.innerHTML = "";
-    
+
     const authAlert = document.createElement("div");
     authAlert.classList.add("auth-required-alert");
-    
+
     const icon = document.createElement("i");
     icon.className = "fa-solid fa-heart";
-    
+
     const title = document.createElement("h2");
     title.className = "auth-title";
     title.textContent = "Accedi per vedere i tuoi preferiti";
-    
+
     const description = document.createElement("p");
     description.className = "auth-description";
     description.textContent = message || "Devi essere loggato per accedere ai tuoi preferiti";
-    
+
     const loginBtn = document.createElement("a");
     loginBtn.href = redirectUrl || "/pages/login/login.php";
     loginBtn.className = "btn btn-primary btn-login";
     loginBtn.textContent = "Accedi";
-    
+
     authAlert.appendChild(icon);
     authAlert.appendChild(title);
     authAlert.appendChild(description);
@@ -505,7 +496,7 @@ function showMessage(message, type) {
     messageElement.offsetHeight;
     messageElement.classList.add('show');
 
-    messageElement.addEventListener('click', () => {
+    messageElement.addEventListener('click', function () {
         messageElement.classList.remove('show');
     });
 }
