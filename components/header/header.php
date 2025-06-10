@@ -22,7 +22,6 @@ if (isLoggedIn() && $user_id) {
         $num_favorites = $favorites->getNumOfFavorites($user_id);
         $num_product_in_cart = $cart->getNumOfProductInCart($user_id);
     } catch (Exception $e) {
-        // Se c'è un errore nel recupero dei dati, logga l'errore ma non bloccare la pagina
         error_log("Errore nel caricamento dati utente: " . $e->getMessage());
         $num_favorites = 0;
         $num_product_in_cart = 0;
@@ -84,7 +83,7 @@ if (isLoggedIn() && $user_id) {
                         <?php if ($user): ?>
                             <div class="tooltip-container">
                                 <p class="link-text">
-                                    <?php echo "Ciao, " . htmlspecialchars($user["nome"]); ?>
+                                    <?php echo "Ciao, " . htmlspecialchars($user["first_name"]); ?>
                                 </p>
                                 <div class="tooltip">
                                     <h3 class="tooltip-title">Account</h3>

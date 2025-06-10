@@ -40,16 +40,16 @@ function populateProfile(userData) {
     loadingElement.style.display = 'none';
 
     const avatarElement = document.getElementById('profile-avatar');
-    if (userData.nome && userData.cognome) {
-        avatarElement.textContent = userData.nome[0].toUpperCase() + userData.cognome[0].toUpperCase();
+    if (userData.first_name && userData.last_name) {
+        avatarElement.textContent = userData.first_name[0].toUpperCase() + userData.last_name[0].toUpperCase();
     }
 
     const nameElement = document.getElementById('profile-name');
-    nameElement.textContent = `${userData.nome} ${userData.cognome}`;
+    nameElement.textContent = `${userData.first_name} ${userData.last_name}`;
 
     const memberSinceElement = document.getElementById('profile-member-since');
-    if (userData.data_registrazione) {
-        const formattedDate = formatItalianDate(userData.data_registrazione);
+    if (userData.created_at) {
+        const formattedDate = formatItalianDate(userData.created_at);
         memberSinceElement.textContent = `Member Nike da ${formattedDate}`;
     }
 

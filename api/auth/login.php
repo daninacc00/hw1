@@ -18,9 +18,9 @@ $user = new User();
 $result = $user->login(trim($_POST['username']), $_POST['password']);
 
 if ($result['success']) {
-    $_SESSION['user_id'] = $result['utente']['id_utente'];
+    $_SESSION['user_id'] = $result['utente']['id'];
     $_SESSION['username'] = $result['utente']['username'];
-    $_SESSION['nome_completo'] = $result['utente']['nome'] . ' ' . $result['utente']['cognome'];
+    $_SESSION['nome_completo'] = $result['utente']['first_name'] . ' ' . $result['utente']['last_name'];
 }
 
 echo json_encode($result);

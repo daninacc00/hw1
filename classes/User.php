@@ -24,7 +24,7 @@ class User
         $nome = mysqli_real_escape_string($this->conn, $nome);
         $cognome = mysqli_real_escape_string($this->conn, $cognome);
 
-        $sql = "INSERT INTO utenti (username, email, password_hash, nome, cognome) 
+        $sql = "INSERT INTO users (username, email, password_hash, first_name, last_name) 
                 VALUES ('$username', '$email', '$passwordHash', '$nome', '$cognome')";
 
         if (mysqli_query($this->conn, $sql)) {
@@ -37,15 +37,15 @@ class User
     public function login($username, $password)
     {
         $username = mysqli_real_escape_string($this->conn, $username);
-        $sql = "SELECT * FROM utenti 
+        $sql = "SELECT * FROM users 
                 WHERE (username = '$username' OR email = '$username') 
-                AND stato_account = 0";
+                AND account_status = 0";
 
         $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
 
         if ($utente = mysqli_fetch_assoc($result)) {
             if (password_verify($password, $utente['password_hash'])) {
-                $this->updateLastLogin($utente['id_utente']);
+                $this->updateLastLogin($utente['id']);
 
                 unset($utente['password_hash']);
 
@@ -63,7 +63,7 @@ class User
         $username = mysqli_real_escape_string($this->conn, $username);
         $email = mysqli_real_escape_string($this->conn, $email);
 
-        $sql = "SELECT COUNT(*) as count FROM utenti WHERE username = '$username' OR email = '$email'";
+        $sql = "SELECT COUNT(*) as count FROM users WHERE username = '$username' OR email = '$email'";
         $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
         $row = mysqli_fetch_assoc($result);
 
@@ -73,7 +73,7 @@ class User
     private function updateLastLogin($idUtente)
     {
         $idUtente = (int)$idUtente;
-        $sql = "UPDATE utenti SET ultimo_accesso = CURRENT_TIMESTAMP WHERE id_utente = $idUtente";
+        $sql = "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $idUtente";
         mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
     }
 
@@ -81,7 +81,7 @@ class User
     {
         $id = (int)$id; 
         $sql = "SELECT * 
-                FROM utenti WHERE id_utente = $id";
+                FROM users WHERE id = $id";
 
         $result = mysqli_query($this->conn, $sql) or die("Errore: " . mysqli_error($this->conn));
         return mysqli_fetch_assoc($result);
